@@ -1213,6 +1213,22 @@ const RESOURCE_MODE_DESC = {
   hoarder: '札を温存。本命にだけ投入する',
 };
 
+// ===== Bidding style (3rd axis) =====
+// Controls how the CPU behaves in simultaneous-reveal and bidding phases.
+const BIDDING_STYLE_TYPES = ['sticky', 'scout', 'burst', 'drifter'];
+const BIDDING_STYLE_LABELS = {
+  sticky:  '粘り',
+  scout:   '偵察',
+  burst:   '一点',
+  drifter: '流し',
+};
+const BIDDING_STYLE_DESC = {
+  sticky:  '安い札で粘り強く競りに参加する',
+  scout:   '控えめに出して様子見。対戦者が多いと早期撤退',
+  burst:   '序盤に全力投入。上限を超えたら即撤退',
+  drifter: '基本は降り。対戦者が減ったときだけ参戦',
+};
+
 function rollResourceMode() {
   const type = RESOURCE_MODES[Math.floor(Math.random() * RESOURCE_MODES.length)];
   const jitter = (range) => (Math.random() - 0.5) * range;
@@ -1235,6 +1251,64 @@ function rollResourceMode() {
       type,
       worryThreshold: 2.4 + jitter(0.4),
       pressureFloor:  0.45 + jitter(0.10),
+    };
+  }
+}
+
+function rollBiddingStyle() {
+  const type = BIDDING_STYLE_TYPES[Math.floor(Math.random() * BIDDING_STYLE_TYPES.length)];
+  const jitter = (range) => (Math.random() - 0.5) * range;
+  if (type === 'sticky') {
+    return {
+      type,
+      desireShiftSim: 0.02 + jitter(0.02),  // tiny upward shift → invests a touch more in sim
+      simCardShift: 0,                       // no card selection shift
+      engageMultiplier: 1.06 + jitter(0.04), // slightly easier to keep fighting
+      competitorDropThreshold: 99,           // unused
+      competitorDesireCap: 0,                // unused
+      commitmentLimit: 99,                   // unused
+      burstInitialBoost: 0,                  // unused
+      opponentCeilingRatio: 1.0,             // unused
+      lonelyDesireFloor: 0,                  // unused
+    };
+  } else if (type === 'scout') {
+    return {
+      type,
+      desireShiftSim: -0.04 + jitter(0.03), // slightly lower desire in simultaneous
+      simCardShift: -1,                      // pick cheaper card
+      engageMultiplier: 0.96 + jitter(0.04), // somewhat harder to engage
+      competitorDropThreshold: 5,            // only retreat when ≥5 opponents (rare)
+      competitorDesireCap: 0.40 + jitter(0.08), // desire below this → drop when crowded
+      commitmentLimit: 99,
+      burstInitialBoost: 0,
+      opponentCeilingRatio: 1.0,
+      lonelyDesireFloor: 0,
+    };
+  } else if (type === 'burst') {
+    return {
+      type,
+      desireShiftSim: -0.01 + jitter(0.02), // barely conservative in sim
+      simCardShift: 0,                       // neutral in simultaneous
+      engageMultiplier: 1.0 + jitter(0.03),  // neutral engagement
+      competitorDropThreshold: 99,
+      competitorDesireCap: 0,
+      commitmentLimit: 99,                   // no commitment-based exit
+      burstInitialBoost: 0.05 + jitter(0.03), // modest initial desire boost
+      opponentCeilingRatio: 1.0,
+      lonelyDesireFloor: 0,
+    };
+  } else { // drifter
+    return {
+      type,
+      desireShiftSim: -0.03 + jitter(0.03), // mild downward shift
+      simCardShift: 0,                       // no card advantage in simultaneous
+      engageMultiplier: 0.96 + jitter(0.04), // slightly harder to engage
+      competitorDropThreshold: 99,
+      competitorDesireCap: 0,
+      commitmentLimit: 99,
+      burstInitialBoost: 0,
+      opponentCeilingRatio: 1.0,             // unused (early exit removed)
+      lonelyDesireFloor: 0,                  // unused (lonely condition removed)
     };
   }
 }
@@ -1416,6 +1490,7 @@ function startGame(numPlayers) {
       simChoice: null,
       personality: isHuman ? null : rollPersonality(),
       resourceMode: isHuman ? null : rollResourceMode(),
+      biddingStyle: isHuman ? null : rollBiddingStyle(),
     });
   }
 
@@ -1794,6 +1869,13 @@ const NEUTRAL_PERSONALITY = {
 };
 function P(player) { return player.personality || NEUTRAL_PERSONALITY; }
 
+const DEFAULT_BIDDING_STYLE = {
+  type: 'sticky', desireShiftSim: 0, simCardShift: 0, engageMultiplier: 1.0,
+  competitorDropThreshold: 99, competitorDesireCap: 0, commitmentLimit: 99,
+  burstInitialBoost: 0, opponentCeilingRatio: 1.0, lonelyDesireFloor: 0,
+};
+function B(player) { return player.biddingStyle || DEFAULT_BIDDING_STYLE; }
+
 // Resource awareness: estimate how scarce our deck/hand feels given the player's
 // resource style. Returns multiplier in [pressureFloor, 1.0]. Lower = scarcer.
 const DEFAULT_RESOURCE = { worryThreshold: 2.4, pressureFloor: 0.40 };
@@ -1972,9 +2054,13 @@ function turnPlayMovement(card, playerId) {
 
 function cpuChooseSimultaneous(player) {
   if (player.hand.length === 0) return null;
-  const desire = calculateDesire(player);
+  const rawDesire = calculateDesire(player);
   const pers = P(player);
+  const bs = B(player);
   const goalSuit = state.goalCard.suit;
+
+  // Apply bidding-style desire shift for simultaneous phase
+  const desire = Math.max(0, Math.min(1, rawDesire + bs.desireShiftSim));
 
   // === High desire: invest seriously ===
   if (desire >= 0.85) {
@@ -2001,11 +2087,13 @@ function cpuChooseSimultaneous(player) {
     if (matching.length > 0) {
       const sorted = matching.slice().sort((a, b) => a.value - b.value);
       // pointHunter goes a bit harder; efficient stays cheap
-      const idx = (pers.type === 'efficient')
+      let idx = (pers.type === 'efficient')
         ? 0
         : (pers.type === 'pointHunter' || pers.type === 'aggressive')
           ? Math.min(sorted.length - 1, Math.ceil(sorted.length / 2))
           : Math.floor(sorted.length / 2);
+      // Apply bidding-style card shift
+      idx = Math.max(0, Math.min(sorted.length - 1, idx + bs.simCardShift));
       return sorted[idx];
     }
     const w6 = player.hand.find(c => c.suit === WILD && c.value === 6);
@@ -2087,14 +2175,26 @@ function cpuTakeTurn(playerId) {
 function cpuDecideAction(player) {
   const playerId = player.id;
   const pers = P(player);
+  const bs = B(player);
   const desire = calculateDesire(player);
   const pos = state.positions.find(p => p.playerId === playerId);
   const distance = WIN_THRESHOLD - pos.value;
   const ableToEnd = canEndTurn(playerId);
   const committed = player._committedThisBattle || 0;
 
+  // Count active opponents (not dropped, not us)
+  const activeOpponents = state.players.filter(
+    p => p.id !== playerId && !p.droppedOut
+  ).length;
+
   // Empty hand: can only end turn or drop
   if (player.hand.length === 0) {
+    return ableToEnd ? { type: 'endTurn' } : { type: 'drop' };
+  }
+
+  // === Bidding-style early exits (rare, extreme-condition only) ===
+  // Scout: ≥5 active opponents with low desire → retreat (only in 5+ player games)
+  if (bs.type === 'scout' && activeOpponents >= bs.competitorDropThreshold && desire < bs.competitorDesireCap) {
     return ableToEnd ? { type: 'endTurn' } : { type: 'drop' };
   }
 
@@ -2148,8 +2248,10 @@ function cpuDecideAction(player) {
 
   // Stickiness from already-committed cards (sunk cost — keep fighting)
   // Plus aggressive personality drop tax.
+  // Burst gets initial desire boost when few cards committed.
   const stickyBoost = (committed > 0 ? pers.sticky : 0) + pers.dropTax;
-  const adjustedDesire = Math.min(1, desire + stickyBoost);
+  const burstBoost = (bs.type === 'burst' && committed <= 1) ? bs.burstInitialBoost : 0;
+  const adjustedDesire = Math.min(1, desire + stickyBoost + burstBoost);
 
   // Build per-card analysis
   const options = player.hand.map((c, i) => ({
@@ -2194,8 +2296,8 @@ function cpuDecideAction(player) {
   if (pickIdx >= options.length) pickIdx = 0;
   const pick = options[pickIdx];
 
-  // Engage thresholds, scaled by personality
-  const playThresh = pers.minEngage;
+  // Engage thresholds, scaled by personality and bidding style
+  const playThresh = pers.minEngage / bs.engageMultiplier;
   const cheapPlayThresh = playThresh - 0.10 * pers.riskTolerance;
 
   let shouldPlay = false;
@@ -2300,9 +2402,20 @@ function renderPlayers() {
         params.push(`残量警戒: ${fmt(rm.worryThreshold)}枚/バトル`);
         params.push(`圧縮下限: ${fmt(rm.pressureFloor)}`);
       }
+      const bst = p.biddingStyle;
+      if (bst) {
+        params.push(`―― ${BIDDING_STYLE_DESC[bst.type]}`);
+        params.push(`同時出しdesire偏差: ${fmt(bst.desireShiftSim)}`);
+        params.push(`カード選択シフト: ${bst.simCardShift}`);
+        params.push(`参戦倍率: ${fmt(bst.engageMultiplier)}`);
+        if (bst.type === 'scout') params.push(`撤退人数閾: ${bst.competitorDropThreshold}人`);
+        if (bst.type === 'burst') params.push(`投入上限: ${bst.commitmentLimit}枚`);
+        if (bst.type === 'drifter') params.push(`参戦上限比率: ${fmt(bst.opponentCeilingRatio)}`);
+      }
       const title = `${PERSONALITY_DESC[pp.type]}\n――\n${params.join('\n')}`;
-      const rmTag = rm ? ` <span style="opacity:.7;font-size:9px">/${RESOURCE_MODE_LABELS[rm.type]}</span>` : '';
-      personaBadge = `<span class="badge persona persona-${pp.type}" title="${title}">${PERSONALITY_LABELS[pp.type]}${focus}${rmTag}</span>`;
+      const rmTag = rm ? `/${RESOURCE_MODE_LABELS[rm.type]}` : '';
+      const bsTag = bst ? `/${BIDDING_STYLE_LABELS[bst.type]}` : '';
+      personaBadge = `<span class="badge persona persona-${pp.type}" title="${title}">${PERSONALITY_LABELS[pp.type]}${focus}<span style="opacity:.7;font-size:9px">${rmTag}${bsTag}</span></span>`;
     }
 
     li.innerHTML = `
@@ -2603,6 +2716,7 @@ function runSimulation(numPlayers, numGames, onProgress) {
     totalBattles: 0,
     perPersonality: {},
     perResourceMode: {},
+    perBiddingStyle: {},
     perSeat: {},
     suitFocusWins: { withFocus: 0, total: 0 },
   };
@@ -2614,6 +2728,9 @@ function runSimulation(numPlayers, numGames, onProgress) {
   }
   for (const r of RESOURCE_MODES) {
     stats.perResourceMode[r] = { games: 0, wins: 0, totalScore: 0, totalCardsLeft: 0 };
+  }
+  for (const b of BIDDING_STYLE_TYPES) {
+    stats.perBiddingStyle[b] = { games: 0, wins: 0, totalScore: 0, totalCardsLeft: 0 };
   }
   for (let s = 0; s < numPlayers; s++) stats.perSeat[s] = 0;
 
@@ -2647,6 +2764,13 @@ function runSimulation(numPlayers, numGames, onProgress) {
         rm.totalScore += score;
         rm.totalCardsLeft += cardsLeft;
         if (p.id === state.winnerId) rm.wins++;
+      }
+      if (p.biddingStyle) {
+        const bm = stats.perBiddingStyle[p.biddingStyle.type];
+        bm.games++;
+        bm.totalScore += score;
+        bm.totalCardsLeft += cardsLeft;
+        if (p.id === state.winnerId) bm.wins++;
       }
     }
     if (winner && winner.personality && winner.personality.suitFocus) {
@@ -2726,6 +2850,29 @@ function renderSimResult(stats) {
   }
   rmTable += '</tbody></table>';
 
+  // Per bidding style
+  let bsTable = `<table><thead><tr>
+    <th>競り方</th><th class="num">出場</th><th class="num">勝</th>
+    <th class="num">勝率</th><th class="num">vs 公平</th>
+    <th class="num">平均得点</th><th class="num">平均残カード</th>
+  </tr></thead><tbody>`;
+  for (const b of BIDDING_STYLE_TYPES) {
+    const r = stats.perBiddingStyle[b];
+    if (r.games === 0) continue;
+    const winRate = r.wins / r.games * 100;
+    const baseline = (r.wins / r.games) / (1 / stats.numPlayers);
+    bsTable += `<tr>
+      <td>${BIDDING_STYLE_LABELS[b]}</td>
+      <td class="num">${r.games}</td>
+      <td class="num">${r.wins}</td>
+      <td class="num">${winRate.toFixed(1)}%</td>
+      <td class="num">${baseline.toFixed(2)}×</td>
+      <td class="num">${(r.totalScore / r.games).toFixed(1)}</td>
+      <td class="num">${(r.totalCardsLeft / r.games).toFixed(1)}</td>
+    </tr>`;
+  }
+  bsTable += '</tbody></table>';
+
   // Per seat
   let seatTable = `<table><thead><tr><th>席</th><th class="num">勝</th><th class="num">勝率</th></tr></thead><tbody>`;
   for (let s = 0; s < stats.numPlayers; s++) {
@@ -2755,6 +2902,11 @@ function renderSimResult(stats) {
       <h3>リソース型 別 勝率</h3>
       ${rmTable}
       <p style="font-size:11px; color:var(--ink-soft); margin:8px 0 0;">使い切/柔軟/保持の3型。性格と直交してランダム付与されます。</p>
+    </div>
+    <div class="sim-section">
+      <h3>競り方 別 勝率</h3>
+      ${bsTable}
+      <p style="font-size:11px; color:var(--ink-soft); margin:8px 0 0;">粘り/偵察/一点/流しの4型。性格・リソース型と直交してランダム付与されます。</p>
     </div>
     <div class="sim-section">
       <h3>席別 勝数</h3>
