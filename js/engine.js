@@ -95,6 +95,20 @@ function startNewBattle() {
       me.simChoice = cpuChooseSimultaneous(me);
     }
     processSimultaneousReveal();
+  } else {
+    // Non-silent: if human has no hand, the "出す" button stays disabled and
+    // the game would stall. Auto-advance after a short delay so the player
+    // can see they were dealt 0 cards before being auto-dropped.
+    const me = state.players[0];
+    if (me && me.hand.length === 0) {
+      log(`${me.name} は手札なし → 自動で進行します`);
+      setTimeout(() => {
+        if (state.phase === 'reveal' && state.players[0].hand.length === 0) {
+          processSimultaneousReveal();
+          render();
+        }
+      }, 1400);
+    }
   }
 }
 
