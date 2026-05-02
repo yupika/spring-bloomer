@@ -934,10 +934,12 @@ header .tag {
   .tab-nav { display: flex; }
   #game { grid-template-columns: 1fr; padding: 8px; gap: 8px; }
   #game .left-col, #game .right-col { display: contents; }
-  body[data-active-tab="players"] [data-tab]:not([data-tab="players"]) { display: none !important; }
-  body[data-active-tab="battle"] [data-tab]:not([data-tab="battle"]) { display: none !important; }
-  body[data-active-tab="log"] [data-tab]:not([data-tab="log"]) { display: none !important; }
-  body[data-active-tab="rules"] [data-tab]:not([data-tab="rules"]) { display: none !important; }
+  body[data-active-tab="players"] [data-tab]:not([data-tab~="players"]) { display: none !important; }
+  body[data-active-tab="battle"] [data-tab]:not([data-tab~="battle"]) { display: none !important; }
+  body[data-active-tab="log"] [data-tab]:not([data-tab~="log"]) { display: none !important; }
+  body[data-active-tab="rules"] [data-tab]:not([data-tab~="rules"]) { display: none !important; }
+  /* On battle tab, place the "your collected cards" panel after the play area */
+  body[data-active-tab="battle"] #my-goals-panel { order: 99; }
   .card.hand-card { width: 48px; height: 70px; }
   .card.hand-card .v { font-size: 22px; }
   .card.hand-card .s { font-size: 16px; }
