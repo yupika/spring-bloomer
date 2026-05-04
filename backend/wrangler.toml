@@ -6,7 +6,7 @@ compatibility_date = "2024-09-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "spring-bloomer"
-database_id = "REPLACE_WITH_DATABASE_ID"
+database_id = "558fc99c-3efa-4883-bde9-7b7342da6f56"
 
 # Origins allowed to POST logs. Add localhost for dev work.
 [vars]

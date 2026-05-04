@@ -5,9 +5,9 @@
 // - Silent simulation runs are NEVER logged.
 // - Sends one POST per finished game (game_end), not per event.
 
-// TODO: replace with the deployed Worker URL after `wrangler deploy`.
-// Either a workers.dev URL or a custom subdomain (e.g. api-bloom.dilettantegames.net).
-const API_ORIGIN = 'https://spring-bloomer-api.REPLACE.workers.dev';
+// Deployed Cloudflare Worker URL. Swap to a custom subdomain
+// (e.g. api-bloom.dilettantegames.net) once the DNS/route is wired.
+const API_ORIGIN = 'https://spring-bloomer-api.yupika-iris.workers.dev';
 
 const APP_VERSION = 'v0.2';
 const UID_KEY    = 'bloomer-uid';
