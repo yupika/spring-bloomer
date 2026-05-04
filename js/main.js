@@ -19,6 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const sc = document.getElementById('sim-cta');
     if (sc) sc.classList.remove('hidden');
   }
+
+  // Log opt-in: sync checkbox with localStorage state
+  const optInToggle = $('log-optin-toggle');
+  if (optInToggle) {
+    optInToggle.checked = isLogOptedIn();
+    optInToggle.addEventListener('change', (e) => setLogOptIn(e.target.checked));
+  }
   document.querySelectorAll('[data-players]').forEach(btn => {
     btn.addEventListener('click', () => {
       state.silent = false;

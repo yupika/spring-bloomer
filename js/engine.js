@@ -40,6 +40,8 @@ function startGame(numPlayers) {
 
   for (const p of state.players) drawToHand(p);
 
+  if (typeof logGameStart === 'function') logGameStart(numPlayers, state.parentIdx);
+
   startNewBattle();
   render();
 }
@@ -81,6 +83,14 @@ function startNewBattle() {
   }
 
   log(`━━ Battle ${state.currentRound} 開始 ／ 親: ${state.players[state.parentIdx].name} ／ 目的: ${formatCard(state.goalCard)} (${SUIT_LABELS[state.goalCard.suit]}) ━━`, 'section');
+  if (typeof logEvent === 'function') {
+    logEvent('battle_start', {
+      round: state.currentRound,
+      parent_seat: state.parentIdx,
+      goal: { value: state.goalCard.value, suit: state.goalCard.suit },
+      dummies: state.dummies.map(d => d.revealed ? { value: d.revealed.value, suit: d.revealed.suit, effect: d.revealed.effect || null } : null),
+    });
+  }
 
   // CPU pre-decides their sim card
   for (const p of state.players) {
@@ -145,6 +155,13 @@ function processSimultaneousReveal() {
     placeCounter++;
     state.positions[idx] = { playerId: p.id, value: score, placedAt: placeCounter };
     log(`${p.name} スコア ${score} (${formatCard(p.simChoice)})`);
+    if (typeof logEvent === 'function') {
+      logEvent('sim_choice', {
+        seat: p.id,
+        card: { value: p.simChoice.value, suit: p.simChoice.suit, effect: p.simChoice.effect || null },
+        score,
+      });
+    }
   }
 
   // Activate wild "draw" effects for sim reveal
@@ -298,6 +315,13 @@ function playCard(playerId, cardIdx) {
   pos.placedAt = maxPA + 1;
 
   log(logLine);
+  if (typeof logEvent === 'function') {
+    logEvent('play', {
+      seat: playerId,
+      card: { value: card.value, suit: card.suit, effect: card.effect || null },
+      score_after: pos.value,
+    });
+  }
 
   // Draw effect: after playing, draw 1 card from deck
   if (card.suit === WILD && card.effect === 'draw') {
@@ -324,6 +348,7 @@ function playCard(playerId, cardIdx) {
 // Explicitly end the current player's turn. Pass to next-lowest active player.
 function endTurn(playerId) {
   log(`${state.players[playerId].name} ターン終了`);
+  if (typeof logEvent === 'function') logEvent('end_turn', { seat: playerId });
   determineNextBidder();
 }
 
@@ -344,6 +369,7 @@ function dropOut(playerId) {
   const player = state.players[playerId];
   player.droppedOut = true;
   log(`${player.name} 降りた`);
+  if (typeof logEvent === 'function') logEvent('drop', { seat: playerId });
   determineNextBidder();
 }
 
@@ -352,6 +378,13 @@ function endBattle(winnerId, reason) {
   state.currentTurnPlayerId = null;
   if (reason && state.battleEndCounts) {
     state.battleEndCounts[reason] = (state.battleEndCounts[reason] || 0) + 1;
+  }
+  if (typeof logEvent === 'function') {
+    logEvent('battle_end', {
+      round: state.currentRound,
+      winner_seat: winnerId,
+      end_reason: reason || null,
+    });
   }
 
   if (winnerId !== null) {
@@ -364,6 +397,14 @@ function endBattle(winnerId, reason) {
       state.phase = 'gameOver';
       state.winnerId = winnerId;
       log(`🌸 ${w.name} の勝利！（即勝条件達成）`, 'win');
+      if (typeof logGameEnd === 'function') {
+        logGameEnd({
+          num_battles: state.currentRound,
+          winner_seat: winnerId,
+          win_reason: 'instant',
+          winner_score: w.goalCards.reduce((s, c) => s + c.value, 0),
+        });
+      }
       if (!state.silent) render();
       return;
     }
@@ -384,6 +425,14 @@ function endBattle(winnerId, reason) {
     state.phase = 'gameOver';
     state.winnerId = best.id;
     log(`規定 ${state.maxRounds} バトル終了。${best.name} が ${bestScore} 点で勝利`, 'win');
+    if (typeof logGameEnd === 'function') {
+      logGameEnd({
+        num_battles: state.currentRound,
+        winner_seat: best.id,
+        win_reason: 'points',
+        winner_score: bestScore,
+      });
+    }
     if (!state.silent) render();
     return;
   }

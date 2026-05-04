@@ -42,6 +42,17 @@
       <p class="muted" style="font-size:12px; margin:8px 0 0;">初めての方はゲーム開始前にひととおり目を通すと安心です。</p>
     </div>
 
+    <div class="optin-cta">
+      <label class="optin-row">
+        <input type="checkbox" id="log-optin-toggle">
+        <span><strong>プレイデータの送信に協力する</strong></span>
+      </label>
+      <p class="muted" style="font-size:11px; margin:6px 0 0;">
+        ゲームバランス調整のため、各バトルの進行（出されたカードや勝者など）を匿名で集計しています。<br>
+        端末ごとに自動生成される匿名IDのみを使用、個人情報は一切送信しません。チェックを外せば送信を停止します。
+      </p>
+    </div>
+
     <div class="sim-cta hidden" id="sim-cta">
       <h3>テストプレイ（無音シミュレーション）</h3>
       <p>CPU同士でゲームを多数回まわし、性格別勝率や平均バトル数などを集計します。<br>ルール調整の参考にお使いください。</p>
@@ -400,6 +411,7 @@
 <script src="js/state.js"></script>
 <script src="js/deck.js"></script>
 <script src="js/personality.js"></script>
+<script src="js/logger.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/render.js"></script>

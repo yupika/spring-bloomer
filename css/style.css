@@ -974,6 +974,26 @@ header .tag {
   border-top: 1px dotted var(--rule);
   text-align: center;
 }
+.optin-cta {
+  margin-top: 18px;
+  padding: 12px 16px;
+  background: var(--paper-shade);
+  border: 1px dashed var(--rule);
+}
+.optin-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink);
+}
+.optin-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--green-deep);
+}
 #manual-btn-setup {
   font-family: inherit;
   font-size: 14px;
