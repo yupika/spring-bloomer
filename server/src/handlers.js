@@ -13,13 +13,11 @@ export function handleMessage(ws, msg) {
     case 'join_room':     return handleJoin(ws, msg);
     case 'leave_room':    return handleLeave(ws);
     case 'start_game':    return handleStart(ws);
-    // Game-action messages (sim_choice / play_card / end_turn / drop)
-    // are handled here in a later chunk once engine is wired.
     case 'sim_choice':
     case 'play_card':
     case 'end_turn':
     case 'drop':
-      return sendError(ws, 'game logic not yet implemented (Phase D chunk 2)');
+      return handleGameAction(ws, msg);
     default:
       return sendError(ws, `unknown message type: ${msg.type}`);
   }
@@ -84,4 +82,12 @@ function handleStart(ws) {
   const room = getRoom(code);
   if (!room) return sendError(ws, 'room not found');
   room.startGame(ws.data.playerId);
+}
+
+function handleGameAction(ws, msg) {
+  const code = ws.data.roomCode;
+  if (!code) return sendError(ws, 'not in a room');
+  const room = getRoom(code);
+  if (!room) return sendError(ws, 'room not found');
+  room.handleAction(ws.data.playerId, msg);
 }
