@@ -1,0 +1,28 @@
+[Unit]
+Description=Spring Bloomer multiplayer server (Bun + WebSocket)
+Documentation=https://github.com/yupika/spring-bloomer
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/apps/spring-bloomer/server
+Environment="PORT=3000"
+Environment="PATH_PREFIX=/spring-bloomer"
+ExecStart=/home/ubuntu/.bun/bin/bun run src/index.js
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=spring-bloomer
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/apps/spring-bloomer/server
+
+[Install]
+WantedBy=multi-user.target
