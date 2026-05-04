@@ -12,6 +12,7 @@
 <body>
 <header>
   <h1><span class="jp">野の花の庭</span>Spring Bloomer <span class="tag">— 試作版 v0.2</span></h1>
+  <button id="manual-btn-header" class="manual-btn-header" title="ルールブックを開く">📖 ルール</button>
 </header>
 
 <nav id="tab-nav" class="tab-nav hidden">
@@ -27,13 +28,18 @@
     <h2>プレイ人数を選んでください</h2>
     <p class="lede">
       あなたは<strong>プレイヤー1</strong>として参加します。残りはCPUとダミー山札（ルール準拠で常に5デッキ使用）。<br>
-      <span class="muted">手札は毎バトル開始時に山札から6枚まで補充。同時出しは自分も加算対象、入札中の手番出しでは自分は加算対象外（場の他カードのみカウント）。各CPUはゲームごとに違う性格（点数狙い／色集め／コスパ重視／攻撃的／バランス）を持ちます。</span>
+      <span class="muted">手札は毎バトル開始時に山札から6枚まで補充。同時出し・入札中の手番出しともに、自分のカードのスートは加算対象外（場の他カードのみカウント）。各CPUはゲームごとに違う性格（点数狙い／色集め／コスパ重視／攻撃的／バランス）を持ちます。</span>
     </p>
     <div class="player-options">
       <button data-players="2"><strong>2人プレイ</strong><small>あなた + CPU1人 + ダミー3 ／ 8バトル</small></button>
       <button data-players="3"><strong>3人プレイ</strong><small>あなた + CPU2人 + ダミー2 ／ 10バトル</small></button>
       <button data-players="4"><strong>4人プレイ</strong><small>あなた + CPU3人 ／ 12バトル</small></button>
       <button data-players="5"><strong>5人プレイ</strong><small>あなた + CPU4人 ／ 14バトル</small></button>
+    </div>
+
+    <div class="manual-cta">
+      <button id="manual-btn-setup">📖 ルールブックを開く</button>
+      <p class="muted" style="font-size:12px; margin:8px 0 0;">初めての方はゲーム開始前にひととおり目を通すと安心です。</p>
     </div>
 
     <div class="sim-cta">
@@ -181,6 +187,210 @@
       <div class="sim-actions">
         <button class="secondary" id="sim-close-btn">閉じる</button>
         <button id="sim-rerun-btn">同じ条件で再実行</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual modal -->
+  <div id="manual-modal" class="hidden">
+    <div class="manual-box">
+      <button class="manual-close" id="manual-close-btn" aria-label="閉じる">×</button>
+      <h2>野の花の庭 ルールブック</h2>
+      <p class="manual-tagline">踏まれても踏まれても…いや、踏まれたら踏まれただけ強くなる。<br>同じ花がいっぱい出ると強い、雑草魂のせりゲー。</p>
+
+      <nav class="manual-toc" aria-label="目次">
+        <strong>目次</strong>
+        <ol>
+          <li><a href="#m-purpose">ゲームの目的</a></li>
+          <li><a href="#m-flow">ゲームの流れ</a></li>
+          <li><a href="#m-battle">バトルの進行</a></li>
+          <li><a href="#m-controls">操作方法（重要）</a></li>
+          <li><a href="#m-score">得点の計算</a></li>
+          <li><a href="#m-cards">カードの内訳</a></li>
+          <li><a href="#m-win">勝利条件</a></li>
+          <li><a href="#m-misc">細かいルール</a></li>
+        </ol>
+      </nav>
+
+      <section id="m-purpose" class="manual-sec">
+        <h3>1. ゲームの目的</h3>
+        <p>毎バトルめくられる<strong>目的札（得点カード）</strong>を取り合うせりゲームです。集めた目的札の組み合わせ、または最終的な合計点で勝者を決めます。</p>
+        <ul>
+          <li>同スートの目的札を <strong>3枚</strong> 揃えると即勝利</li>
+          <li>異なるスートを <strong>4種</strong> 揃えると即勝利</li>
+          <li>規定バトル数を消化したら、目的札の<strong>合計点が最多</strong>の人が勝利</li>
+        </ul>
+      </section>
+
+      <section id="m-flow" class="manual-sec">
+        <h3>2. ゲームの流れ</h3>
+        <ol>
+          <li>各プレイヤーは35枚の同じ内容のデッキを受け取り、6枚を手札にする</li>
+          <li>目的札の山をシャッフルして裏向きで配置、最初の親を決める</li>
+          <li>親が目的札を1枚めくる → <strong>バトル開始</strong></li>
+          <li>バトル勝者が目的札を獲得、次のバトルの親になる</li>
+          <li>バトル間に手札を6枚まで補充（デッキが切れたら補充できない）</li>
+          <li>即勝条件達成 or 規定バトル数到達まで繰り返し</li>
+        </ol>
+      </section>
+
+      <section id="m-battle" class="manual-sec">
+        <h3>3. バトルの進行</h3>
+
+        <h4>3-1. 同時出し（最初の1枚）</h4>
+        <ul>
+          <li>全員、手札から1枚を秘密裏に選び、一斉にオープン</li>
+          <li>2人 / 3人プレイ時はダミー山も同時に1枚オープン</li>
+          <li>親から順にスコアを計算してスコアボードにコマを置く</li>
+          <li>同値の場合、コマが上に乗っているプレイヤーから次の手番が始まる</li>
+        </ul>
+
+        <h4>3-2. 入札（手番制）</h4>
+        <ul>
+          <li>常にスコアが<strong>最低</strong>のプレイヤーが手番</li>
+          <li>手番では「カードを出す」または「降りる」を選択</li>
+          <li><strong>1手番で複数枚出してOK</strong>。1枚ずつスコア計算する</li>
+          <li>最低値を脱出した後は「ターン終了」で次の最低値プレイヤーへ</li>
+          <li>「降りる」を選ぶと以降このバトルには参加しない</li>
+        </ul>
+
+        <h4>3-3. バトル終了</h4>
+        <ul>
+          <li>1人を残して全員が降りる → 残ったプレイヤーが勝者</li>
+          <li>スコアが <strong>30点</strong> に到達 → 到達者が勝者</li>
+          <li>勝者が目的札を獲得、次バトルへ</li>
+        </ul>
+      </section>
+
+      <section id="m-controls" class="manual-sec">
+        <h3>4. 操作方法（重要）</h3>
+        <table class="manual-table">
+          <thead><tr><th>ボタン</th><th>使えるタイミング</th><th>意味</th></tr></thead>
+          <tbody>
+            <tr><td><strong>出す</strong></td><td>同時出し / 入札中の自分の手番</td><td>選択中の手札を場に出す</td></tr>
+            <tr><td><strong>ターン終了</strong></td><td>入札中、最低値を脱出した後</td><td>手番を次の最低値プレイヤーに渡す</td></tr>
+            <tr><td><strong>降りる</strong></td><td>入札中の自分の手番</td><td>このバトルから抜ける（以降参加不可）</td></tr>
+          </tbody>
+        </table>
+
+        <h4>知っておくと得すること</h4>
+        <ul>
+          <li><strong>1手番で複数枚出せる</strong>。最低値を脱出してから「ターン終了」で確実に次に渡すか、さらに積んで引き離すかを選べる</li>
+          <li><strong>手札0枚は自動的に降りる扱い</strong>。バトル開始時に手札が0枚なら自動進行</li>
+          <li><strong>ワイルド「+引」効果</strong>: カードを出した瞬間にデッキから1枚補充される</li>
+          <li><strong>ワイルド「↑載」効果</strong>: 一つ上のスコアのプレイヤーと同点になる（追い抜きはしない）</li>
+          <li><strong>ワイルド「=R」効果</strong>: その瞬間のラウンド数がそのままスコアになる（終盤ほど強い）</li>
+        </ul>
+      </section>
+
+      <section id="m-score" class="manual-sec">
+        <h3>5. 得点の計算</h3>
+        <p>カード1枚を出したときのスコアは：</p>
+        <pre class="manual-formula">スコア = カードの値
+       + 場の同スートカードの数（自分のカードは除外）
+       + 目的札のスートと一致なら +1</pre>
+        <p>同時出しでも入札中でも、<strong>自分が今出したカードのスートは加算対象外</strong>です。</p>
+
+        <h4>例</h4>
+        <div class="manual-example">
+          <p>目的札：5 ✿ ネジハナ ／ 場：✿2枚、❀1枚<br>
+          出すカード：✿ ネジハナ の <strong>3</strong></p>
+          <p>スコア＝ <strong>3</strong>（カード値）＋ <strong>2</strong>（場の✿2枚）＋ <strong>1</strong>（目的札と同スート）＝ <strong>6</strong></p>
+        </div>
+
+        <p class="manual-note">※ ワイルド札は同スートカウントの対象外、目的札ボーナスも対象外です。</p>
+      </section>
+
+      <section id="m-cards" class="manual-sec">
+        <h3>6. カードの内訳</h3>
+
+        <h4>6-1. 5種のスート（花）</h4>
+        <p>各プレイヤーのデッキ（35枚）は全員同じ構成。デッキ枚数の少ない花ほど値が高めです。</p>
+        <table class="manual-table">
+          <thead><tr><th>花</th><th>記号</th><th>デッキ枚数</th><th>含まれる値</th></tr></thead>
+          <tbody>
+            <tr><td>ネジハナ</td><td class="sym suit-a">✿</td><td>4</td><td>3, 4, 5, 6</td></tr>
+            <tr><td>たんぽぽ</td><td class="sym suit-b">❀</td><td>5</td><td>2, 3, 3, 4, 5</td></tr>
+            <tr><td>シロツメクサ</td><td class="sym suit-c">✤</td><td>6</td><td>1, 2, 3, 3, 4, 4</td></tr>
+            <tr><td>スミレ</td><td class="sym suit-d">✾</td><td>7</td><td>1, 1, 2, 2, 3, 3, 4</td></tr>
+            <tr><td>オオイヌノフグリ</td><td class="sym suit-e">☘</td><td>8</td><td>1, 1, 1, 2, 2, 3, 3, 3</td></tr>
+          </tbody>
+        </table>
+
+        <h4>6-2. ワイルド札（5枚 / 全プレイヤー共通）</h4>
+        <table class="manual-table">
+          <thead><tr><th>表記</th><th>枚数</th><th>効果</th></tr></thead>
+          <tbody>
+            <tr><td>0 ✣ [=R]</td><td>1</td><td>その瞬間の値が現在のラウンド数になる</td></tr>
+            <tr><td>0 ✣ [↑載]</td><td>1</td><td>一つ上のスコアのプレイヤーと同点になる</td></tr>
+            <tr><td>1 ✣ [+引]</td><td>2</td><td>値1。出した後にデッキから1枚引く</td></tr>
+            <tr><td>6 ✣</td><td>1</td><td>値6。効果なし</td></tr>
+          </tbody>
+        </table>
+        <p class="manual-note">※ ワイルドは同スートボーナス・目的札ボーナスとも対象外。</p>
+
+        <h4>6-3. 目的札（20枚 / 全ゲーム共通の1組）</h4>
+        <p>各スート4枚ずつ。ネジハナだけ <strong>1, 11, 12</strong> という極端な値を持つピーキー型です。</p>
+        <table class="manual-table">
+          <thead><tr><th>値</th><th>スート</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>✿ ネジハナ</td></tr>
+            <tr><td>2</td><td>❀ たんぽぽ ／ ☘ オオイヌノフグリ</td></tr>
+            <tr><td>3</td><td>✤ シロツメクサ ／ ✾ スミレ ／ ☘ オオイヌノフグリ</td></tr>
+            <tr><td>4</td><td>✾ スミレ</td></tr>
+            <tr><td>5</td><td>✿ ／ ❀ ／ ✤ ／ ✾ ／ ☘（全スート）</td></tr>
+            <tr><td>6</td><td>✤ シロツメクサ</td></tr>
+            <tr><td>7</td><td>❀ たんぽぽ ／ ✤ シロツメクサ</td></tr>
+            <tr><td>9</td><td>✾ スミレ ／ ☘ オオイヌノフグリ</td></tr>
+            <tr><td>11</td><td>✿ ネジハナ ／ ❀ たんぽぽ</td></tr>
+            <tr><td>12</td><td>✿ ネジハナ</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="m-win" class="manual-sec">
+        <h3>7. 勝利条件</h3>
+        <h4>即勝（バトル終了時に判定）</h4>
+        <ul>
+          <li>同スートの目的札を <strong>3枚</strong> 揃える</li>
+          <li>異なる <strong>4種</strong> のスートを揃える</li>
+        </ul>
+        <h4>規定バトル後の判定</h4>
+        <table class="manual-table">
+          <thead><tr><th>人数</th><th>規定バトル数</th></tr></thead>
+          <tbody>
+            <tr><td>2人</td><td>8</td></tr>
+            <tr><td>3人</td><td>10</td></tr>
+            <tr><td>4人</td><td>12</td></tr>
+            <tr><td>5人</td><td>14</td></tr>
+          </tbody>
+        </table>
+        <p>規定バトル消化時に目的札の<strong>合計点が最多</strong>の人が勝利。</p>
+      </section>
+
+      <section id="m-misc" class="manual-sec">
+        <h3>8. 細かいルール</h3>
+        <h4>デッキ切れ</h4>
+        <ul>
+          <li>デッキが0枚になっても補充はない</li>
+          <li>手札も0枚になったら、そのバトルは自動的に降りる扱い</li>
+        </ul>
+        <h4>ダミー山（2人 / 3人プレイ時）</h4>
+        <ul>
+          <li>2人プレイ：3つ、3人プレイ：2つのダミー山が用意される</li>
+          <li>各バトル開始時、ダミー山から1枚ずつ場にオープン</li>
+          <li>ダミーカードは場のシンボル数に加算される（ワイルドは除く）</li>
+          <li>結果として、何人プレイでも常に5デッキを使う</li>
+        </ul>
+        <h4>4人 / 5人プレイ</h4>
+        <ul>
+          <li>ダミー山なし。プレイヤーのデッキのみ</li>
+          <li>4人 → 12バトル、5人 → 14バトル</li>
+        </ul>
+      </section>
+
+      <div class="manual-actions">
+        <button id="manual-close-btn-bottom">閉じる</button>
       </div>
     </div>
   </div>

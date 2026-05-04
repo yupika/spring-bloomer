@@ -4,7 +4,7 @@ const WILD = 'W';
 const ALL_SUITS = [...SUITS, WILD];
 
 const SUIT_LABELS = {
-  A: 'バラ', B: 'タンポポ', C: '勿忘草', D: 'スミレ', E: 'クローバー', W: 'ワイルド'
+  A: 'ネジハナ', B: 'たんぽぽ', C: 'シロツメクサ', D: 'スミレ', E: 'オオイヌノフグリ', W: 'ワイルド'
 };
 const SUIT_GLYPHS = {
   A: '✿', B: '❀', C: '✤', D: '✾', E: '☘', W: '✣'
@@ -42,16 +42,19 @@ const WILD_EFFECT_DESC = {
   draw: '出した後にデッキから1枚引く',
 };
 
-// Goal cards (19 total)
+// Goal cards (20 total — 4 per suit, all suits hold a 5)
+// A is "peaky" (1 + 11 + 12 + the shared 5), C is the mid-range allrounder.
 const GOAL_CARD_SPEC = [
-  { value: 1,  suits: ['C'] },
-  { value: 2,  suits: ['A', 'B'] },
+  { value: 1,  suits: ['A'] },
+  { value: 2,  suits: ['B', 'E'] },
   { value: 3,  suits: ['C', 'D', 'E'] },
+  { value: 4,  suits: ['D'] },
   { value: 5,  suits: ['A', 'B', 'C', 'D', 'E'] },
-  { value: 7,  suits: ['A', 'B', 'C'] },
+  { value: 6,  suits: ['C'] },
+  { value: 7,  suits: ['B', 'C'] },
   { value: 9,  suits: ['D', 'E'] },
   { value: 11, suits: ['A', 'B'] },
-  { value: 12, suits: ['C'] }
+  { value: 12, suits: ['A'] }
 ];
 
 const HAND_SIZE = 6;

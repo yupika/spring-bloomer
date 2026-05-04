@@ -35,6 +35,7 @@ function runSimulation(numPlayers, numGames, onProgress) {
     perBiddingStyle: {},
     perSeat: {},
     suitFocusWins: { withFocus: 0, total: 0 },
+    battleEndReasons: { scoreOut: 0, lastStanding: 0, allDropped: 0 },
   };
   for (const t of PERSONALITY_TYPES) {
     stats.perPersonality[t] = {
@@ -93,6 +94,11 @@ function runSimulation(numPlayers, numGames, onProgress) {
       stats.suitFocusWins.total++;
     }
     stats.perSeat[state.winnerId]++;
+    if (state.battleEndCounts) {
+      for (const r of Object.keys(stats.battleEndReasons)) {
+        stats.battleEndReasons[r] += state.battleEndCounts[r] || 0;
+      }
+    }
     stats.completed++;
     if (onProgress) onProgress(stats.completed, numGames);
   }
@@ -229,10 +235,23 @@ function renderSimResult(stats) {
       ${seatTable}
     </div>
     <div class="sim-section">
-      <h3>決着内訳</h3>
+      <h3>ゲーム決着内訳</h3>
       即勝（同スート3 or 異4種）: <strong>${stats.instantWins}</strong> / ${totalGames}（${(stats.instantWins/totalGames*100).toFixed(1)}%）<br>
       点数勝ち（規定バトル消化）: <strong>${stats.pointWins}</strong> / ${totalGames}（${(stats.pointWins/totalGames*100).toFixed(1)}%）<br>
       平均バトル数: <strong>${stats.avgBattles.toFixed(2)}</strong>
+    </div>
+    <div class="sim-section">
+      <h3>バトル決着内訳</h3>
+      ${(() => {
+        const r = stats.battleEndReasons;
+        const total = r.scoreOut + r.lastStanding + r.allDropped;
+        if (total === 0) return '（データなし）';
+        const pct = (n) => `${n} (${(n/total*100).toFixed(1)}%)`;
+        return `30点到達で決着: <strong>${pct(r.scoreOut)}</strong><br>
+                他全員が降りて勝者確定: <strong>${pct(r.lastStanding)}</strong><br>
+                全員降りて勝者なし: <strong>${pct(r.allDropped)}</strong><br>
+                バトル総数: <strong>${total}</strong>`;
+      })()}
     </div>`;
   $('sim-content').innerHTML = html;
 }

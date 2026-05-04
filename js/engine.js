@@ -10,6 +10,7 @@ function startGame(numPlayers) {
   state.goalDeck = createGoalDeck();
   state.log = [];
   state.winnerId = null;
+  state.battleEndCounts = { scoreOut: 0, lastStanding: 0, allDropped: 0 };
 
   for (let i = 0; i < numPlayers; i++) {
     const isHuman = (i === 0) && !state.silent;
@@ -140,7 +141,7 @@ function processSimultaneousReveal() {
       log(`${p.name} は手札なし → 自動的に降りる`);
       continue;
     }
-    const score = computeScore(p.simChoice);
+    const score = computeScore(p.simChoice, true);
     placeCounter++;
     state.positions[idx] = { playerId: p.id, value: score, placedAt: placeCounter };
     log(`${p.name} スコア ${score} (${formatCard(p.simChoice)})`);
@@ -165,13 +166,15 @@ function processSimultaneousReveal() {
   determineNextBidder();
 }
 
-// Compute score for placing/playing a card. The caller controls whether
-// "own" is counted by deciding when to place the card on state.field:
-//   - Sim reveal: place all cards on field FIRST, then compute (own counted).
-//   - Turn play: compute FIRST, then place (own NOT counted).
+// Compute score for placing/playing a card. Own card is never counted in the
+// same-suit field tally; the caller signals which timing is in effect:
+//   - Sim reveal: all sim cards are already on field, pass excludeOwn=true.
+//   - Turn play: card is not yet on field, default excludeOwn=false works.
+// Goal-suit +1 bonus is preserved in both cases (own card matching the goal
+// is a separate mechanic from the field count).
 // Wild cards never receive the +1 goal-suit bonus and are never counted
 // in the same-suit field count.
-function computeScore(card) {
+function computeScore(card, excludeOwn = false) {
   if (card.suit === WILD) {
     if (card.effect === 'round') return state.currentRound;
     // 'stack' effect produces an absolute jump, handled in playCard;
@@ -186,6 +189,7 @@ function computeScore(card) {
   for (const f of state.field) {
     if (f.card.suit === card.suit) same++;
   }
+  if (excludeOwn) same--;
   let score = card.value + same;
   if (card.suit === goalSuit) score += 1;
   return score;
@@ -196,11 +200,11 @@ function determineNextBidder() {
   const active = state.positions.filter(pos => !state.players[pos.playerId].droppedOut);
 
   if (active.length === 0) {
-    endBattle(null);
+    endBattle(null, 'allDropped');
     return;
   }
   if (active.length === 1) {
-    endBattle(active[0].playerId);
+    endBattle(active[0].playerId, 'lastStanding');
     return;
   }
 
@@ -308,7 +312,7 @@ function playCard(playerId, cardIdx) {
 
   if (pos.value >= WIN_THRESHOLD) {
     log(`${player.name} が ${WIN_THRESHOLD} に到達！`, 'win');
-    endBattle(playerId);
+    endBattle(playerId, 'scoreOut');
     return;
   }
 
@@ -343,9 +347,12 @@ function dropOut(playerId) {
   determineNextBidder();
 }
 
-function endBattle(winnerId) {
+function endBattle(winnerId, reason) {
   state.phase = 'battleEnd';
   state.currentTurnPlayerId = null;
+  if (reason && state.battleEndCounts) {
+    state.battleEndCounts[reason] = (state.battleEndCounts[reason] || 0) + 1;
+  }
 
   if (winnerId !== null) {
     const w = state.players[winnerId];

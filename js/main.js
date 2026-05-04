@@ -47,6 +47,28 @@ document.addEventListener('DOMContentLoaded', () => {
     startSimulation();
   });
 
+  // Manual modal
+  const openManual = () => {
+    const modal = $('manual-modal');
+    modal.classList.remove('hidden');
+    // Reset scroll to the top each time it opens
+    const box = modal.querySelector('.manual-box');
+    if (box) box.scrollTop = 0;
+  };
+  const closeManual = () => $('manual-modal').classList.add('hidden');
+  $('manual-btn-header').addEventListener('click', openManual);
+  $('manual-btn-setup').addEventListener('click', openManual);
+  $('manual-close-btn').addEventListener('click', closeManual);
+  $('manual-close-btn-bottom').addEventListener('click', closeManual);
+  // Click outside the box to close
+  $('manual-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'manual-modal') closeManual();
+  });
+  // Escape to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !$('manual-modal').classList.contains('hidden')) closeManual();
+  });
+
   // Show tab nav (it's hidden by default to avoid FOUC; CSS handles desktop hide)
   $('tab-nav').classList.remove('hidden');
 
