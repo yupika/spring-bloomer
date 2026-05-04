@@ -1,6 +1,24 @@
 'use strict';
 // ============== Event Handlers ==============
+// Dev mode: enable simulation panel and any other dev tooling.
+// Trigger with ?dev=1 (or #dev) in the URL. Persists for the session via
+// sessionStorage so refreshes don't lose it.
+function isDevMode() {
+  if (sessionStorage.getItem('bloomer-dev') === '1') return true;
+  const params = new URLSearchParams(location.search);
+  if (params.get('dev') === '1' || location.hash === '#dev') {
+    sessionStorage.setItem('bloomer-dev', '1');
+    return true;
+  }
+  return false;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  if (isDevMode()) {
+    document.body.classList.add('dev-mode');
+    const sc = document.getElementById('sim-cta');
+    if (sc) sc.classList.remove('hidden');
+  }
   document.querySelectorAll('[data-players]').forEach(btn => {
     btn.addEventListener('click', () => {
       state.silent = false;
