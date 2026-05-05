@@ -29,19 +29,48 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-players]').forEach(btn => {
     btn.addEventListener('click', () => {
       state.silent = false;
+      state.mode = 'single';
+      state.mySeat = 0;
       startGame(parseInt(btn.dataset.players));
       setActiveTab('battle');
     });
   });
   $('play-btn').addEventListener('click', () => {
     if (state.selectedCardIdx === null) return;
-    humanPlay(state.selectedCardIdx);
+    if (state.mode === 'multi') {
+      const idx = state.selectedCardIdx;
+      state.selectedCardIdx = null;
+      if (state.phase === 'reveal') mpSimChoice(idx);
+      else if (state.phase === 'bidding' && state.currentTurnPlayerId === state.mySeat) mpPlayCard(idx);
+      render();
+    } else {
+      humanPlay(state.selectedCardIdx);
+    }
   });
-  $('end-turn-btn').addEventListener('click', humanEndTurn);
-  $('drop-btn').addEventListener('click', humanDrop);
+  $('end-turn-btn').addEventListener('click', () => {
+    if (state.mode === 'multi') {
+      state.selectedCardIdx = null;
+      mpEndTurn();
+      render();
+    } else {
+      humanEndTurn();
+    }
+  });
+  $('drop-btn').addEventListener('click', () => {
+    if (state.mode === 'multi') {
+      state.selectedCardIdx = null;
+      mpDrop();
+      render();
+    } else {
+      humanDrop();
+    }
+  });
   $('reset-btn').addEventListener('click', () => {
     if (state.cpuTimeoutId) clearTimeout(state.cpuTimeoutId);
+    if (state.mode === 'multi') mpLeaveRoom();
     state.silent = false;
+    state.mode = 'single';
+    state.mySeat = 0;
     state.phase = 'setup';
     state.players = [];
     state.dummies = [];
@@ -49,11 +78,44 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   });
   $('play-again-btn').addEventListener('click', () => {
+    if (state.mode === 'multi') mpLeaveRoom();
+    state.mode = 'single';
+    state.mySeat = 0;
     state.phase = 'setup';
     state.players = [];
     state.dummies = [];
     state.log = [];
     render();
+  });
+
+  // ===== Online play / Lobby =====
+  $('mp-create-btn').addEventListener('click', () => {
+    const name = $('mp-name').value.trim();
+    mpCreateRoom(name);
+  });
+  $('mp-join-btn').addEventListener('click', () => {
+    const name = $('mp-name').value.trim();
+    const code = $('mp-code').value.trim();
+    mpJoinRoom(code, name);
+  });
+  $('mp-code').addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase();
+  });
+  $('mp-code').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('mp-join-btn').click();
+  });
+  $('lobby-start-btn').addEventListener('click', () => mpStartGame());
+  $('lobby-leave-btn').addEventListener('click', () => mpLeaveRoom());
+  $('lobby-copy-btn').addEventListener('click', async () => {
+    if (!mp.roomCode) return;
+    try { await navigator.clipboard.writeText(mp.roomCode); } catch {}
+  });
+
+  // Persist player name across sessions for convenience
+  const savedName = localStorage.getItem('bloomer-mp-name');
+  if (savedName) $('mp-name').value = savedName;
+  $('mp-name').addEventListener('change', (e) => {
+    localStorage.setItem('bloomer-mp-name', e.target.value.trim());
   });
 
   // Tabs

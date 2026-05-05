@@ -980,6 +980,179 @@ header .tag {
   background: var(--paper-shade);
   border: 1px dashed var(--rule);
 }
+
+/* ===== Online play (setup screen) ===== */
+.online-cta {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px dotted var(--rule);
+}
+.online-cta h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  color: var(--green-deep);
+  margin: 0 0 6px;
+  letter-spacing: 0.05em;
+}
+.online-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.online-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.online-name-row input {
+  flex: 1;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 6px 10px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+}
+.online-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.online-buttons button {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px 14px;
+  background: var(--green-deep);
+  color: var(--paper);
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+.online-buttons button:hover { background: var(--green-leaf); }
+.online-buttons input {
+  width: 80px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  text-align: center;
+  padding: 6px 4px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.online-or {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+.online-status {
+  font-size: 12px;
+  color: var(--suit-a);
+  min-height: 16px;
+  font-style: italic;
+}
+
+/* ===== Lobby ===== */
+.lobby-panel {
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--paper);
+  border: 2px solid var(--green-deep);
+}
+.lobby-panel h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  color: var(--green-deep);
+  margin: 0 0 8px;
+  letter-spacing: 0.05em;
+}
+.lobby-code-row {
+  font-size: 14px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lobby-code {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--green-deep);
+  letter-spacing: 0.2em;
+  background: var(--paper-shade);
+  padding: 2px 12px;
+  border: 1px dashed var(--rule);
+}
+.lobby-copy-btn {
+  font-size: 16px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.lobby-copy-btn:hover { background: var(--paper-shade); }
+.lobby-players {
+  list-style: none;
+  margin: 12px 0 16px;
+  padding: 0;
+}
+.lobby-players li {
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  background: var(--paper-shade);
+  border-left: 3px solid var(--green-leaf);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lobby-players li.host { border-left-color: var(--suit-a); }
+.lobby-players .name { font-weight: 600; flex: 1; }
+.lobby-players .host-tag,
+.lobby-players .you-tag,
+.lobby-players .disconnected-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  letter-spacing: 0.05em;
+  color: var(--paper);
+}
+.lobby-players .host-tag { background: var(--suit-a); }
+.lobby-players .you-tag { background: var(--green-deep); }
+.lobby-players .disconnected-tag { background: var(--ink-soft); }
+.lobby-actions {
+  display: flex;
+  gap: 8px;
+}
+.lobby-actions button {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 18px;
+  background: var(--green-deep);
+  color: var(--paper);
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+.lobby-actions button:hover { background: var(--green-leaf); }
+.lobby-actions button.secondary {
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+.lobby-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.lobby-error {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--suit-a);
+  font-style: italic;
+  min-height: 14px;
+}
+
 .optin-row {
   display: flex;
   align-items: center;

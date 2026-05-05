@@ -37,6 +37,45 @@
       <button data-players="5"><strong>5人プレイ</strong><small>あなた + CPU4人 ／ 14バトル</small></button>
     </div>
 
+    <!-- ===== Online play ===== -->
+    <div class="online-cta" id="online-cta">
+      <h3>みんなでオンライン対戦</h3>
+      <p class="muted" style="font-size:12px; margin:0 0 10px;">
+        部屋コードを共有して、2人以上で対戦できます。CPUは入りません。
+      </p>
+      <div class="online-form">
+        <label class="online-name-row">
+          <span>あなたの名前</span>
+          <input type="text" id="mp-name" maxlength="16" placeholder="プレイヤー名">
+        </label>
+        <div class="online-buttons">
+          <button id="mp-create-btn">部屋を作る</button>
+          <span class="online-or">／</span>
+          <input type="text" id="mp-code" maxlength="4" placeholder="ABCD" autocapitalize="characters">
+          <button id="mp-join-btn">参加</button>
+        </div>
+        <div id="mp-status-line" class="online-status"></div>
+      </div>
+    </div>
+
+    <!-- ===== Lobby (visible while in a room, before game starts) ===== -->
+    <div class="lobby-panel hidden" id="lobby-panel">
+      <h3>待機ロビー</h3>
+      <div class="lobby-code-row">
+        部屋コード: <span class="lobby-code" id="lobby-code">----</span>
+        <button class="lobby-copy-btn" id="lobby-copy-btn" title="コピー">📋</button>
+      </div>
+      <p class="muted" style="font-size:12px; margin:6px 0 12px;">
+        このコードを他のプレイヤーに伝えてください。揃ったらホストが「開始」を押します。
+      </p>
+      <ul class="lobby-players" id="lobby-players"></ul>
+      <div class="lobby-actions">
+        <button id="lobby-start-btn">▶ ゲーム開始</button>
+        <button id="lobby-leave-btn" class="secondary">退出</button>
+      </div>
+      <div id="lobby-error" class="lobby-error"></div>
+    </div>
+
     <div class="manual-cta">
       <button id="manual-btn-setup">📖 ルールブックを開く</button>
       <p class="muted" style="font-size:12px; margin:8px 0 0;">初めての方はゲーム開始前にひととおり目を通すと安心です。</p>
@@ -415,6 +454,7 @@
 <script src="js/engine.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/render.js"></script>
+<script src="js/multiplayer.js"></script>
 <script src="js/simulator.js"></script>
 <script src="js/main.js"></script>
 </body>

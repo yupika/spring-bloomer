@@ -14,7 +14,10 @@ function render() {
   $('result').classList.toggle('hidden', state.phase !== 'gameOver');
   $('tab-nav').classList.toggle('hidden', state.phase === 'setup' || state.phase === 'gameOver');
 
-  if (state.phase === 'setup') return;
+  if (state.phase === 'setup') {
+    if (typeof renderLobbyOrSetup === 'function') renderLobbyOrSetup();
+    return;
+  }
   if (state.phase === 'gameOver') { renderResult(); return; }
 
   renderPlayers();
@@ -179,7 +182,7 @@ function renderBoard() {
         chip.className = 'chip';
         chip.style.background = PLAYER_COLORS[pos.playerId];
         chip.title = `${state.players[pos.playerId].name} (${pos.value})`;
-        chip.textContent = pos.playerId === 0 ? 'Y' : `${pos.playerId}`;
+        chip.textContent = pos.playerId === state.mySeat ? 'Y' : `${pos.playerId}`;
         if (state.players[pos.playerId].droppedOut) chip.style.opacity = '0.4';
         chips.appendChild(chip);
       }
@@ -220,7 +223,7 @@ function cardHTMLString(card, size) {
 }
 
 function renderHand() {
-  const me = state.players[0];
+  const me = state.players[state.mySeat];
   $('hand-count').textContent = me.hand.length;
   $('deck-count').textContent = me.deck.length;
 
@@ -234,8 +237,9 @@ function renderHand() {
     return a.c.value - b.c.value;
   });
 
-  const isMyTurn = (state.phase === 'reveal') ||
-                   (state.phase === 'bidding' && state.currentTurnPlayerId === 0);
+  const alreadySubmitted = state.mode === 'multi' && state.phase === 'reveal' && me.simChoice;
+  const isMyTurn = (state.phase === 'reveal' && !alreadySubmitted) ||
+                   (state.phase === 'bidding' && state.currentTurnPlayerId === state.mySeat);
 
   for (const { c, i } of indexed) {
     const cardEl = document.createElement('div');
@@ -263,7 +267,7 @@ function renderHand() {
 }
 
 function renderMyGoals() {
-  const me = state.players[0];
+  const me = state.players[state.mySeat];
   const div = $('my-goals-row');
   div.innerHTML = '';
   if (me.goalCards.length === 0) {
@@ -305,19 +309,33 @@ function renderPhase() {
   endTurnBtn.disabled = true;
   dropBtn.disabled = true;
 
-  const me = state.players[0];
+  const me = state.players[state.mySeat];
 
   if (state.phase === 'reveal') {
-    txt.innerHTML = `<strong>同時出しフェイズ</strong> ／ 親 ${state.players[state.parentIdx].name}<br><span class="muted">手札からカードを選んで「出す」を押す。CPUは既に選択済み。</span>`;
-    playBtn.disabled = state.selectedCardIdx === null || me.hand.length === 0;
-    playBtn.textContent = '出す';
+    if (state.mode === 'multi' && me.simChoice) {
+      // I've already submitted; show waiting state
+      const total = state.players.length;
+      const submitted = state.players.filter(p => p.simChoice).length;
+      // For others' simChoice we can only see our own due to reveal-phase filtering,
+      // so derive remaining from positions or fall back to a generic message.
+      txt.innerHTML = `<strong>同時出しフェイズ</strong> ／ 提出済み<br><span class="muted">他のプレイヤーを待っています…（${submitted} / ${total} 名以上）</span>`;
+      playBtn.disabled = true;
+    } else {
+      const note = state.mode === 'multi'
+        ? '手札からカードを選んで「出す」を押す。他のプレイヤーが選択するまで待ちます。'
+        : '手札からカードを選んで「出す」を押す。CPUは既に選択済み。';
+      txt.innerHTML = `<strong>同時出しフェイズ</strong> ／ 親 ${state.players[state.parentIdx].name}<br><span class="muted">${note}</span>`;
+      playBtn.disabled = state.selectedCardIdx === null || me.hand.length === 0;
+      playBtn.textContent = '出す';
+    }
   } else if (state.phase === 'bidding') {
     const cur = state.players[state.currentTurnPlayerId];
-    if (cur && cur.isHuman) {
-      const myPos = state.positions.find(p => p.playerId === 0);
-      const ableToEnd = canEndTurn(0);
+    const meIsCurrentTurn = state.currentTurnPlayerId === state.mySeat;
+    if (meIsCurrentTurn) {
+      const myPos = state.positions.find(p => p.playerId === state.mySeat);
+      const ableToEnd = canEndTurn(state.mySeat);
       const others = state.positions
-        .filter(p => p.playerId !== 0 && !state.players[p.playerId].droppedOut);
+        .filter(p => p.playerId !== state.mySeat && !state.players[p.playerId].droppedOut);
       const minOther = others.length > 0 ? Math.min.apply(null, others.map(p => p.value)) : 0;
 
       if (ableToEnd) {
@@ -332,7 +350,8 @@ function renderPhase() {
       endTurnBtn.disabled = !ableToEnd;
       dropBtn.disabled = false;
     } else if (cur) {
-      txt.innerHTML = `<strong>${cur.name} の手番</strong>...<br><span class="muted">CPU思考中</span>`;
+      const note = state.mode === 'multi' ? '相手の入力待ち' : 'CPU思考中';
+      txt.innerHTML = `<strong>${cur.name} の手番</strong>...<br><span class="muted">${note}</span>`;
     } else {
       txt.textContent = '...';
     }
@@ -349,7 +368,9 @@ function renderLog() {
 
 function renderResult() {
   const w = state.players[state.winnerId];
-  $('result-title').textContent = w.isHuman ? '🌸 あなたの勝利!' : `🥀 ${w.name} の勝利`;
+  if (!w) { $('result-title').textContent = 'ゲーム終了'; $('result-detail').innerHTML = ''; return; }
+  const isMe = state.winnerId === state.mySeat;
+  $('result-title').textContent = isMe ? '🌸 あなたの勝利!' : `🥀 ${w.name} の勝利`;
   const sorted = state.players.slice().sort((a, b) => {
     const at = a.goalCards.reduce((s, c) => s + c.value, 0);
     const bt = b.goalCards.reduce((s, c) => s + c.value, 0);

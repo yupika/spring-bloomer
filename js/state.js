@@ -17,4 +17,6 @@ const state = {
   currentTurnPlayerId: null,
   cpuTimeoutId: null,
   silent: false, // when true, skip rendering and run synchronously (for sim)
+  mode: 'single',  // 'single' (vs CPU) | 'multi' (online via play.dilettantegames.net)
+  mySeat: 0,       // local player's seat index (always 0 in single mode)
 };
