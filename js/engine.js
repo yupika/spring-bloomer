@@ -1,6 +1,6 @@
 'use strict';
 // ============== Init ==============
-function startGame(numPlayers) {
+function startGame(numPlayers, humanName) {
   state.numPlayers = numPlayers;
   state.maxRounds = ROUND_LIMITS[numPlayers];
   state.currentRound = 0;
@@ -12,11 +12,13 @@ function startGame(numPlayers) {
   state.winnerId = null;
   state.battleEndCounts = { scoreOut: 0, lastStanding: 0, allDropped: 0 };
 
+  const resolvedHumanName = (humanName && humanName.trim()) || 'あなた';
+
   for (let i = 0; i < numPlayers; i++) {
     const isHuman = (i === 0) && !state.silent;
     state.players.push({
       id: i,
-      name: isHuman ? 'あなた' : (state.silent ? `P${i + 1}` : `CPU ${i}`),
+      name: isHuman ? resolvedHumanName : (state.silent ? `P${i + 1}` : `CPU ${i}`),
       isHuman,
       deck: createPlayerDeck(),
       hand: [],
@@ -390,7 +392,7 @@ function endBattle(winnerId, reason) {
   if (winnerId !== null) {
     const w = state.players[winnerId];
     w.goalCards.push(state.goalCard);
-    log(`★ ${w.name} が目的カード ${formatCard(state.goalCard)} を獲得`, 'win');
+    log(`★ ${w.name} が得点札 ${formatCard(state.goalCard)} を獲得`, 'win');
     state.parentIdx = winnerId;
 
     if (checkInstantWin(w)) {

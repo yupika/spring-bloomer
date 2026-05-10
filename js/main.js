@@ -26,12 +26,24 @@ document.addEventListener('DOMContentLoaded', () => {
     optInToggle.checked = isLogOptedIn();
     optInToggle.addEventListener('change', (e) => setLogOptIn(e.target.checked));
   }
+
+  // Player name: load from localStorage, persist on change
+  const nameInput = $('player-name-input');
+  if (nameInput) {
+    const saved = localStorage.getItem('bloomer-player-name') || '';
+    nameInput.value = saved;
+    nameInput.addEventListener('input', (e) => {
+      localStorage.setItem('bloomer-player-name', e.target.value.trim());
+    });
+  }
+
   document.querySelectorAll('[data-players]').forEach(btn => {
     btn.addEventListener('click', () => {
       state.silent = false;
       state.mode = 'single';
       state.mySeat = 0;
-      startGame(parseInt(btn.dataset.players));
+      const name = (nameInput?.value || '').trim() || 'あなた';
+      startGame(parseInt(btn.dataset.players), name);
       setActiveTab('battle');
     });
   });

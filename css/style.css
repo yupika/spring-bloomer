@@ -77,6 +77,33 @@ header .tag {
   color: var(--ink-soft);
   line-height: 1.7;
 }
+.name-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+.name-input-row label {
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.name-input-row input {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px 10px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  flex: 1;
+  max-width: 240px;
+}
+.name-input-row input:focus {
+  outline: none;
+  border-color: var(--green-leaf);
+  box-shadow: 0 0 0 2px rgba(106,142,90,0.2);
+}
 .player-options {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

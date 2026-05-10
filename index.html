@@ -30,6 +30,10 @@
       あなたは<strong>プレイヤー1</strong>として参加します。残りはCPUとダミー山札（ルール準拠で常に5デッキ使用）。<br>
       <span class="muted">手札は毎バトル開始時に山札から6枚まで補充。同時出し・入札中の手番出しともに、自分のカードのスートは加算対象外（場の他カードのみカウント）。各CPUはゲームごとに違う性格（点数狙い／色集め／コスパ重視／攻撃的／バランス）を持ちます。</span>
     </p>
+    <div class="name-input-row">
+      <label for="player-name-input">プレイヤー名</label>
+      <input type="text" id="player-name-input" maxlength="12" placeholder="あなた" autocomplete="off">
+    </div>
     <div class="player-options">
       <button data-players="2"><strong>2人プレイ</strong><small>あなた + CPU1人 + ダミー3 ／ 8バトル</small></button>
       <button data-players="3"><strong>3人プレイ</strong><small>あなた + CPU2人 + ダミー2 ／ 10バトル</small></button>
@@ -246,7 +250,6 @@
     <div class="manual-box">
       <button class="manual-close" id="manual-close-btn" aria-label="閉じる">×</button>
       <h2>野の花の庭 ルールブック</h2>
-      <p class="manual-tagline">踏まれても踏まれても…いや、踏まれたら踏まれただけ強くなる。<br>同じ花がいっぱい出ると強い、雑草魂のせりゲー。</p>
 
       <nav class="manual-toc" aria-label="目次">
         <strong>目次</strong>
@@ -264,11 +267,11 @@
 
       <section id="m-purpose" class="manual-sec">
         <h3>1. ゲームの目的</h3>
-        <p>毎バトルめくられる<strong>目的札（得点カード）</strong>を取り合うせりゲームです。集めた目的札の組み合わせ、または最終的な合計点で勝者を決めます。</p>
+        <p>毎バトルめくられる<strong>得点札（得点カード）</strong>を取り合うせりゲームです。集めた得点札の組み合わせ、または最終的な合計点で勝者を決めます。</p>
         <ul>
-          <li>同スートの目的札を <strong>3枚</strong> 揃えると即勝利</li>
+          <li>同スートの得点札を <strong>3枚</strong> 揃えると即勝利</li>
           <li>異なるスートを <strong>4種</strong> 揃えると即勝利</li>
-          <li>規定バトル数を消化したら、目的札の<strong>合計点が最多</strong>の人が勝利</li>
+          <li>規定バトル数を消化したら、得点札の<strong>合計点が最多</strong>の人が勝利</li>
         </ul>
       </section>
 
@@ -276,9 +279,9 @@
         <h3>2. ゲームの流れ</h3>
         <ol>
           <li>各プレイヤーは35枚の同じ内容のデッキを受け取り、6枚を手札にする</li>
-          <li>目的札の山をシャッフルして裏向きで配置、最初の親を決める</li>
-          <li>親が目的札を1枚めくる → <strong>バトル開始</strong></li>
-          <li>バトル勝者が目的札を獲得、次のバトルの親になる</li>
+          <li>得点札の山をシャッフルして裏向きで配置、最初の親を決める</li>
+          <li>親が得点札を1枚めくる → <strong>バトル開始</strong></li>
+          <li>バトル勝者が得点札を獲得、次のバトルの親になる</li>
           <li>バトル間に手札を6枚まで補充（デッキが切れたら補充できない）</li>
           <li>即勝条件達成 or 規定バトル数到達まで繰り返し</li>
         </ol>
@@ -308,7 +311,7 @@
         <ul>
           <li>1人を残して全員が降りる → 残ったプレイヤーが勝者</li>
           <li>スコアが <strong>30点</strong> に到達 → 到達者が勝者</li>
-          <li>勝者が目的札を獲得、次バトルへ</li>
+          <li>勝者が得点札を獲得、次バトルへ</li>
         </ul>
       </section>
 
@@ -322,15 +325,6 @@
             <tr><td><strong>降りる</strong></td><td>入札中の自分の手番</td><td>このバトルから抜ける（以降参加不可）</td></tr>
           </tbody>
         </table>
-
-        <h4>知っておくと得すること</h4>
-        <ul>
-          <li><strong>1手番で複数枚出せる</strong>。最低値を脱出してから「ターン終了」で確実に次に渡すか、さらに積んで引き離すかを選べる</li>
-          <li><strong>手札0枚は自動的に降りる扱い</strong>。バトル開始時に手札が0枚なら自動進行</li>
-          <li><strong>ワイルド「+引」効果</strong>: カードを出した瞬間にデッキから1枚補充される</li>
-          <li><strong>ワイルド「↑載」効果</strong>: 一つ上のスコアのプレイヤーと同点になる（追い抜きはしない）</li>
-          <li><strong>ワイルド「=R」効果</strong>: その瞬間のラウンド数がそのままスコアになる（終盤ほど強い）</li>
-        </ul>
       </section>
 
       <section id="m-score" class="manual-sec">
@@ -338,24 +332,24 @@
         <p>カード1枚を出したときのスコアは：</p>
         <pre class="manual-formula">スコア = カードの値
        + 場の同スートカードの数（自分のカードは除外）
-       + 目的札のスートと一致なら +1</pre>
+       + 得点札のスートと一致なら +1</pre>
         <p>同時出しでも入札中でも、<strong>自分が今出したカードのスートは加算対象外</strong>です。</p>
 
         <h4>例</h4>
         <div class="manual-example">
-          <p>目的札：5 ✿ ネジハナ ／ 場：✿2枚、❀1枚<br>
+          <p>得点札：5 ✿ ネジハナ ／ 場：✿2枚、❀1枚<br>
           出すカード：✿ ネジハナ の <strong>3</strong></p>
-          <p>スコア＝ <strong>3</strong>（カード値）＋ <strong>2</strong>（場の✿2枚）＋ <strong>1</strong>（目的札と同スート）＝ <strong>6</strong></p>
+          <p>スコア＝ <strong>3</strong>（カード値）＋ <strong>2</strong>（場の✿2枚）＋ <strong>1</strong>（得点札と同スート）＝ <strong>6</strong></p>
         </div>
 
-        <p class="manual-note">※ ワイルド札は同スートカウントの対象外、目的札ボーナスも対象外です。</p>
+        <p class="manual-note">※ ワイルド札は同スートカウントの対象外、得点札ボーナスも対象外です。</p>
       </section>
 
       <section id="m-cards" class="manual-sec">
         <h3>6. カードの内訳</h3>
 
         <h4>6-1. 5種のスート（花）</h4>
-        <p>各プレイヤーのデッキ（35枚）は全員同じ構成。デッキ枚数の少ない花ほど値が高めです。</p>
+        <p>各プレイヤーのデッキ（35枚）は全員同じ構成。</p>
         <table class="manual-table">
           <thead><tr><th>花</th><th>記号</th><th>デッキ枚数</th><th>含まれる値</th></tr></thead>
           <tbody>
@@ -377,10 +371,10 @@
             <tr><td>6 ✣</td><td>1</td><td>値6。効果なし</td></tr>
           </tbody>
         </table>
-        <p class="manual-note">※ ワイルドは同スートボーナス・目的札ボーナスとも対象外。</p>
+        <p class="manual-note">※ ワイルドは同スートボーナス・得点札ボーナスとも対象外。</p>
 
-        <h4>6-3. 目的札（20枚 / 全ゲーム共通の1組）</h4>
-        <p>各スート4枚ずつ。ネジハナだけ <strong>1, 11, 12</strong> という極端な値を持つピーキー型です。</p>
+        <h4>6-3. 得点札（20枚 / 全ゲーム共通の1組）</h4>
+        <p>各スート4枚ずつ。</p>
         <table class="manual-table">
           <thead><tr><th>値</th><th>スート</th></tr></thead>
           <tbody>
@@ -402,7 +396,7 @@
         <h3>7. 勝利条件</h3>
         <h4>即勝（バトル終了時に判定）</h4>
         <ul>
-          <li>同スートの目的札を <strong>3枚</strong> 揃える</li>
+          <li>同スートの得点札を <strong>3枚</strong> 揃える</li>
           <li>異なる <strong>4種</strong> のスートを揃える</li>
         </ul>
         <h4>規定バトル後の判定</h4>
@@ -415,7 +409,7 @@
             <tr><td>5人</td><td>14</td></tr>
           </tbody>
         </table>
-        <p>規定バトル消化時に目的札の<strong>合計点が最多</strong>の人が勝利。</p>
+        <p>規定バトル消化時に得点札の<strong>合計点が最多</strong>の人が勝利。</p>
       </section>
 
       <section id="m-misc" class="manual-sec">

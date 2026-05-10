@@ -41,12 +41,22 @@
 
 ```
 .
-├── index.html           本体（HTML / CSS / JS 全部入り）
+├── index.html           フロント本体（Cloudflare Pagesに配信）
+├── js/, css/            フロント資産
+├── wrangler.jsonc       Pagesデプロイ設定
+├── backend/             ログAPI（Cloudflare Worker + D1）
+├── server/              マルチプレイサーバ（VPS Bun）
 ├── origin-rule.md       元ルール
 ├── request.md           初期要望メモ
 ├── バランス調整ログ.md   AI調整の経緯と最終データ
+├── ARCHITECTURE.md      構成・デプロイ仕様（必読）
 └── README.md            このファイル
 ```
+
+## 構成・デプロイ
+
+3層構成（フロント = Cloudflare Pages、ログAPI = Cloudflare Worker、マルチプレイ = VPS Bun）。
+編集箇所とデプロイ先を間違えないよう [`ARCHITECTURE.md`](./ARCHITECTURE.md) を参照。
 
 ## ライセンス
 
