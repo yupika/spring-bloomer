@@ -101,14 +101,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ===== Online play / Lobby =====
+  const getDisplayName = () => (nameInput?.value || '').trim() || 'あなた';
   $('mp-create-btn').addEventListener('click', () => {
-    const name = $('mp-name').value.trim();
-    mpCreateRoom(name);
+    mpCreateRoom(getDisplayName());
   });
   $('mp-join-btn').addEventListener('click', () => {
-    const name = $('mp-name').value.trim();
     const code = $('mp-code').value.trim();
-    mpJoinRoom(code, name);
+    mpJoinRoom(code, getDisplayName());
   });
   $('mp-code').addEventListener('input', (e) => {
     e.target.value = e.target.value.toUpperCase();
@@ -121,13 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('lobby-copy-btn').addEventListener('click', async () => {
     if (!mp.roomCode) return;
     try { await navigator.clipboard.writeText(mp.roomCode); } catch {}
-  });
-
-  // Persist player name across sessions for convenience
-  const savedName = localStorage.getItem('bloomer-mp-name');
-  if (savedName) $('mp-name').value = savedName;
-  $('mp-name').addEventListener('change', (e) => {
-    localStorage.setItem('bloomer-mp-name', e.target.value.trim());
   });
 
   // Tabs

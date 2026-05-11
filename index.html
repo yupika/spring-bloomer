@@ -11,7 +11,7 @@
 </head>
 <body>
 <header>
-  <h1><span class="jp">野の花の庭</span>Spring Bloomer <span class="tag">— 試作版 v0.2</span></h1>
+  <h1><span class="jp">野の花の庭</span>Spring Bloomer</h1>
   <button id="manual-btn-header" class="manual-btn-header" title="ルールブックを開く">📖 ルール</button>
 </header>
 
@@ -32,7 +32,7 @@
     </p>
     <div class="name-input-row">
       <label for="player-name-input">プレイヤー名</label>
-      <input type="text" id="player-name-input" maxlength="12" placeholder="あなた" autocomplete="off">
+      <input type="text" id="player-name-input" maxlength="16" placeholder="あなた" autocomplete="off">
     </div>
     <div class="player-options">
       <button data-players="2"><strong>2人プレイ</strong><small>あなた + CPU1人 + ダミー3 ／ 8バトル</small></button>
@@ -48,10 +48,6 @@
         部屋コードを共有して、2人以上で対戦できます。CPUは入りません。
       </p>
       <div class="online-form">
-        <label class="online-name-row">
-          <span>あなたの名前</span>
-          <input type="text" id="mp-name" maxlength="16" placeholder="プレイヤー名">
-        </label>
         <div class="online-buttons">
           <button id="mp-create-btn">部屋を作る</button>
           <span class="online-or">／</span>

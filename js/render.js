@@ -340,10 +340,10 @@ function renderPhase() {
 
       if (ableToEnd) {
         const margin = myPos.value - minOther;
-        txt.innerHTML = `<strong>${cur.name} の手番</strong>（最下位は他へ） ／ 位置 ${myPos.value}（次点 ${minOther}、差 +${margin}）<br><span class="muted">続けて出して引き離す／「ターン終了」で次のプレイヤーへ／降りる</span>`;
+        txt.innerHTML = `<strong>▶ あなたの手番です</strong>（最下位は他へ） ／ 位置 ${myPos.value}（次点 ${minOther}、差 +${margin}）<br><span class="muted">続けて出して引き離す／「ターン終了」で次のプレイヤーへ／降りる</span>`;
       } else {
         const cardsRemain = me.hand.length;
-        txt.innerHTML = `<strong>${cur.name} の手番</strong>（最下位） ／ 位置 ${myPos.value} ／ 残り ${WIN_THRESHOLD - myPos.value} で勝利<br><span class="muted">出すか降りるかを選択（最下位を抜けるまで複数枚出してOK）／手札 ${cardsRemain}枚</span>`;
+        txt.innerHTML = `<strong>▶ あなたの手番です</strong>（最下位） ／ 位置 ${myPos.value} ／ 残り ${WIN_THRESHOLD - myPos.value} で勝利<br><span class="muted">出すか降りるかを選択（最下位を抜けるまで複数枚出してOK）／手札 ${cardsRemain}枚</span>`;
       }
       playBtn.disabled = state.selectedCardIdx === null || me.hand.length === 0;
       playBtn.textContent = '出す';
