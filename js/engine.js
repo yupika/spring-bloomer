@@ -11,6 +11,7 @@ function startGame(numPlayers, humanName) {
   state.log = [];
   state.winnerId = null;
   state.battleEndCounts = { scoreOut: 0, lastStanding: 0, allDropped: 0 };
+  state.revealedGoalCards = [];
 
   const resolvedHumanName = (humanName && humanName.trim()) || 'あなた';
 
@@ -75,6 +76,7 @@ function startNewBattle() {
     state.goalDeck = createGoalDeck();
   }
   state.goalCard = state.goalDeck.shift();
+  if (state.revealedGoalCards) state.revealedGoalCards.push(state.goalCard);
 
   // Reveal dummies and place them on the battlefield from the start
   for (const d of state.dummies) {
@@ -456,10 +458,16 @@ function checkInstantWin(player) {
   const suitCount = {};
   for (const c of cards) suitCount[c.suit] = (suitCount[c.suit] || 0) + 1;
 
-  for (const c of Object.values(suitCount)) {
-    if (c >= 3) return true; // 3 of same suit
+  for (const [suit, c] of Object.entries(suitCount)) {
+    if (c >= 3) {
+      state.lastInstantWinReason = { type: 'sameSuit', suit };
+      return true;
+    }
   }
   const required = DISTINCT_SUITS_REQUIRED;
-  if (Object.keys(suitCount).length >= required) return true;
+  if (Object.keys(suitCount).length >= required) {
+    state.lastInstantWinReason = { type: 'distinctSuits', count: Object.keys(suitCount).length };
+    return true;
+  }
   return false;
 }

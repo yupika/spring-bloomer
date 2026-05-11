@@ -36,7 +36,19 @@ function runSimulation(numPlayers, numGames, onProgress) {
     perSeat: {},
     suitFocusWins: { withFocus: 0, total: 0 },
     battleEndReasons: { scoreOut: 0, lastStanding: 0, allDropped: 0 },
+    // Per goal card (value-suit): appearance and winner-claim counts.
+    // pointWin* tracks only point-win games; all* tracks all games.
+    goalCardStats: {},
   };
+  for (const spec of GOAL_CARD_SPEC) {
+    for (const s of spec.suits) {
+      stats.goalCardStats[`${spec.value}-${s}`] = {
+        value: spec.value, suit: s,
+        appearedAll: 0, winnerHeldAll: 0,
+        appearedPoint: 0, winnerHeldPoint: 0,
+      };
+    }
+  }
   for (const t of PERSONALITY_TYPES) {
     stats.perPersonality[t] = {
       games: 0, wins: 0, totalScore: 0, totalCardsLeft: 0,
@@ -60,6 +72,21 @@ function runSimulation(numPlayers, numGames, onProgress) {
     const wasInstantWin = state.currentRound < state.maxRounds;
     if (wasInstantWin) stats.instantWins++; else stats.pointWins++;
     stats.totalBattles += state.currentRound;
+
+    // Goal card appearance / winner-held tally
+    const revealed = state.revealedGoalCards || [];
+    const winnerHeldKeys = new Set((winner ? winner.goalCards : []).map(c => `${c.value}-${c.suit}`));
+    const appearedKeys = new Set(revealed.map(c => `${c.value}-${c.suit}`));
+    for (const key of appearedKeys) {
+      const rec = stats.goalCardStats[key];
+      if (!rec) continue;
+      rec.appearedAll++;
+      if (winnerHeldKeys.has(key)) rec.winnerHeldAll++;
+      if (!wasInstantWin) {
+        rec.appearedPoint++;
+        if (winnerHeldKeys.has(key)) rec.winnerHeldPoint++;
+      }
+    }
     for (const p of state.players) {
       const pp = p.personality;
       if (!pp) continue;
@@ -239,6 +266,51 @@ function renderSimResult(stats) {
       即勝（同スート3 or 異4種）: <strong>${stats.instantWins}</strong> / ${totalGames}（${(stats.instantWins/totalGames*100).toFixed(1)}%）<br>
       点数勝ち（規定バトル消化）: <strong>${stats.pointWins}</strong> / ${totalGames}（${(stats.pointWins/totalGames*100).toFixed(1)}%）<br>
       平均バトル数: <strong>${stats.avgBattles.toFixed(2)}</strong>
+    </div>
+    <div class="sim-section">
+      <h3>得点札別 勝利貢献度（点数勝ち時）</h3>
+      ${(() => {
+        const rows = Object.values(stats.goalCardStats)
+          .filter(r => r.appearedPoint > 0)
+          .map(r => ({
+            ...r,
+            rate: r.winnerHeldPoint / r.appearedPoint,
+            rateAll: r.appearedAll > 0 ? r.winnerHeldAll / r.appearedAll : 0,
+            appearRate: r.appearedAll / totalGames,
+          }))
+          .sort((a, b) => b.rate - a.rate);
+        if (rows.length === 0) return '（点数勝ちのゲームが0件）';
+        const fair = 1 / stats.numPlayers;
+        let tbl = `<table><thead><tr>
+          <th>得点札</th><th class="num">値</th>
+          <th class="num">出現/全</th><th class="num">出現率</th>
+          <th class="num">点勝出現</th><th class="num">勝者獲得</th>
+          <th class="num">獲得率</th><th class="num">vs 公平</th>
+        </tr></thead><tbody>`;
+        for (const r of rows) {
+          const baseline = r.rate / fair;
+          const baseColor = baseline > 1.20 ? 'var(--suit-a)'
+                          : baseline > 1.05 ? 'var(--green-deep)'
+                          : baseline < 0.80 ? 'var(--ink-soft)' : 'var(--ink)';
+          tbl += `<tr>
+            <td><span style="color:var(--suit-${r.suit.toLowerCase()});font-weight:600">${r.value} ${SUIT_GLYPHS[r.suit]}</span> <span style="color:var(--ink-soft);font-size:11px">${SUIT_LABELS[r.suit]}</span></td>
+            <td class="num">${r.value}</td>
+            <td class="num">${r.appearedAll}/${totalGames}</td>
+            <td class="num">${(r.appearRate * 100).toFixed(1)}%</td>
+            <td class="num">${r.appearedPoint}</td>
+            <td class="num">${r.winnerHeldPoint}</td>
+            <td class="num">${(r.rate * 100).toFixed(1)}%</td>
+            <td class="num" style="color:${baseColor};font-weight:600">${baseline.toFixed(2)}×</td>
+          </tr>`;
+        }
+        tbl += '</tbody></table>';
+        return tbl;
+      })()}
+      <p style="font-size:11px; color:var(--ink-soft); margin:8px 0 0;">
+        「獲得率」=（点数勝ち時に勝者が保有していた割合）／（同カードが出現した点数勝ちゲーム）。
+        「vs 公平」が <strong>1.20×超</strong>（赤）は勝者に集まりがちで強カードの疑い。
+        100%に近いほど「勝利に常に絡む」。
+      </p>
     </div>
     <div class="sim-section">
       <h3>バトル決着内訳</h3>

@@ -35,17 +35,18 @@ export const WILD_EFFECT_LABELS = {
   draw: '+引',
 };
 
-// Goal cards (20 total — 4 per suit, all suits hold a 5)
+// Goal cards (25 total — 5 per suit, all suits hold a 5)
+// Pyramid distribution peaking at value 5.
 export const GOAL_CARD_SPEC = [
   { value: 1,  suits: ['A'] },
   { value: 2,  suits: ['B', 'E'] },
   { value: 3,  suits: ['C', 'D', 'E'] },
-  { value: 4,  suits: ['D'] },
+  { value: 4,  suits: ['A', 'C', 'D', 'E'] },
   { value: 5,  suits: ['A', 'B', 'C', 'D', 'E'] },
-  { value: 6,  suits: ['C'] },
-  { value: 7,  suits: ['B', 'C'] },
+  { value: 6,  suits: ['B', 'C', 'D'] },
+  { value: 7,  suits: ['A', 'B', 'C'] },
   { value: 9,  suits: ['D', 'E'] },
-  { value: 11, suits: ['A', 'B'] },
+  { value: 11, suits: ['B'] },
   { value: 12, suits: ['A'] }
 ];
 

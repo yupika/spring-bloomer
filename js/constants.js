@@ -42,18 +42,19 @@ const WILD_EFFECT_DESC = {
   draw: '出した後にデッキから1枚引く',
 };
 
-// Goal cards (20 total — 4 per suit, all suits hold a 5)
-// A is "peaky" (1 + 11 + 12 + the shared 5), C is the mid-range allrounder.
+// Goal cards (25 total — 5 per suit, all suits hold a 5)
+// Pyramid distribution peaking at value 5.
+// A: peaky (1, 11, 12), C: clean allrounder.
 const GOAL_CARD_SPEC = [
   { value: 1,  suits: ['A'] },
   { value: 2,  suits: ['B', 'E'] },
   { value: 3,  suits: ['C', 'D', 'E'] },
-  { value: 4,  suits: ['D'] },
+  { value: 4,  suits: ['A', 'C', 'D', 'E'] },
   { value: 5,  suits: ['A', 'B', 'C', 'D', 'E'] },
-  { value: 6,  suits: ['C'] },
-  { value: 7,  suits: ['B', 'C'] },
+  { value: 6,  suits: ['B', 'C', 'D'] },
+  { value: 7,  suits: ['A', 'B', 'C'] },
   { value: 9,  suits: ['D', 'E'] },
-  { value: 11, suits: ['A', 'B'] },
+  { value: 11, suits: ['B'] },
   { value: 12, suits: ['A'] }
 ];
 
@@ -79,7 +80,7 @@ const PERSONALITY_LABELS = {
 };
 const PERSONALITY_DESC = {
   balanced: '広く普通に競る',
-  pointHunter: '高得点カードに集中。低得点は流す',
+  pointHunter: '高得点札に集中。低得点は流す',
   collector: '特定スートを集める。他色は積極ダンプ',
   efficient: '安く済むときだけ参戦',
   aggressive: '高得点目的を選んで一発で取る',
