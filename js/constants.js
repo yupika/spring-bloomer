@@ -12,10 +12,10 @@ const SUIT_GLYPHS = {
 
 // Per-player deck breakdown (35 cards)
 const DECK_SPEC = {
-  A: [3, 4, 5, 6],
-  B: [2, 3, 3, 4, 5],
-  C: [1, 2, 3, 3, 4, 4],
-  D: [1, 1, 2, 2, 3, 3, 4],
+  A: [3, 4, 6, 7],
+  B: [2, 3, 3, 5, 6],
+  C: [2, 2, 3, 3, 4, 4],
+  D: [1, 2, 2, 2, 3, 3, 4],
   E: [1, 1, 1, 2, 2, 3, 3, 3],
 };
 // Wild cards have special effects.
@@ -60,7 +60,7 @@ const GOAL_CARD_SPEC = [
 
 const HAND_SIZE = 6;
 const SCORE_BOARD_MAX = 35;
-const WIN_THRESHOLD = 30;
+const WIN_THRESHOLD = 33;
 const ROUND_LIMITS = { 2: 8, 3: 10, 4: 12, 5: 14 };
 const DUMMY_COUNTS = { 2: 3, 3: 2, 4: 0, 5: 0 };
 // Number of distinct suits required to win (alternative to 3 of same suit)
