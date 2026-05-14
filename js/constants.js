@@ -7,7 +7,7 @@ const SUIT_LABELS = {
   A: 'ネジハナ', B: 'たんぽぽ', C: 'シロツメクサ', D: 'スミレ', E: 'オオイヌノフグリ', W: 'ワイルド'
 };
 const SUIT_GLYPHS = {
-  A: '✿', B: '❀', C: '✤', D: '✾', E: '☘', W: '✣'
+  A: '✿', B: '❀', C: '☘', D: '✾', E: '✤', W: '✣'
 };
 
 // Per-player deck breakdown (35 cards)
