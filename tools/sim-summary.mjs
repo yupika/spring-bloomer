@@ -41,7 +41,7 @@ for (const np of PLAYER_COUNTS) {
   console.log(`  Avg battles per game: ${stats.avgBattles.toFixed(2)}`);
   console.log(`  Game ends -- instant: ${stats.instantWins} (${(stats.instantWins/RUNS*100).toFixed(1)}%), points: ${stats.pointWins} (${(stats.pointWins/RUNS*100).toFixed(1)}%)`);
   console.log(`  Battle outcomes (total ${total}):`);
-  console.log(`    score-out (>=30):     ${pct(r.scoreOut)}`);
+  console.log(`    score-out:            ${pct(r.scoreOut)}`);
   console.log(`    last-standing:        ${pct(r.lastStanding)}`);
   console.log(`    all-dropped:          ${pct(r.allDropped)}`);
   console.log('');

@@ -51,7 +51,7 @@ export const GOAL_CARD_SPEC = [
 
 export const HAND_SIZE = 6;
 export const SCORE_BOARD_MAX = 35;
-export const WIN_THRESHOLD = 30;
+export const WIN_THRESHOLD = 33;
 export const DISTINCT_SUITS_REQUIRED = 4;
 
 // Hardcoded for 2-5p (matches client). For >5p we extrapolate +2 battles per

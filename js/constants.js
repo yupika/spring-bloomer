@@ -57,7 +57,7 @@ const GOAL_CARD_SPEC = [
 
 const HAND_SIZE = 6;
 const SCORE_BOARD_MAX = 35;
-const WIN_THRESHOLD = 30;
+const WIN_THRESHOLD = 33;
 const ROUND_LIMITS = { 2: 8, 3: 10, 4: 12, 5: 14 };
 const DUMMY_COUNTS = { 2: 3, 3: 2, 4: 0, 5: 0 };
 // Number of distinct suits required to win (alternative to 3 of same suit)
