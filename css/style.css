@@ -499,14 +499,15 @@ header .tag {
 .card.suit-e { border-color: var(--suit-e); color: var(--suit-e); }
 .card.suit-w { border-color: var(--suit-w); color: var(--suit-w); background: repeating-linear-gradient(45deg, var(--paper) 0 6px, var(--paper-shade) 6px 12px); }
 
-/* シロツメクサ：白い花なのでグリフだけ白ヌキ（数字とボーダーは緑のまま） */
+/* シロツメクサ：白い花なのでグリフだけ完全白（紙背景にうっすら影で輪郭） */
 .card.suit-c .s,
 .goal-mini.suit-c .gs,
 .suit-tally .st.suit-c .glyph,
 .manual-table td.sym.suit-c {
-  color: #fff;
-  -webkit-text-stroke: 0.6px var(--suit-c);
-  text-shadow: 0 0 1px var(--suit-c);
+  color: #ffffff;
+  text-shadow:
+    0 0 1px rgba(0, 0, 0, 0.55),
+    0 1px 1.5px rgba(0, 0, 0, 0.25);
 }
 
 .card.small { width: 36px; height: 60px; padding: 3px 1px; }
