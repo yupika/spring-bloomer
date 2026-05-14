@@ -198,10 +198,6 @@ function processSimultaneousReveal() {
 function computeScore(card, excludeOwn = false) {
   if (card.suit === WILD) {
     if (card.effect === 'round') return state.currentRound;
-    // 'stack' effect produces an absolute jump, handled in playCard;
-    // for sim reveal it contributes 0 (no other player can be "above" in a
-    // useful way during simultaneous placement).
-    if (card.effect === 'stack') return 0;
     // 'draw' wild and the plain 6 just use face value.
     return card.value;
   }
@@ -289,29 +285,12 @@ function playCard(playerId, cardIdx) {
   player._committedThisBattle = (player._committedThisBattle || 0) + 1;
 
   const pos = state.positions.find(p => p.playerId === playerId);
-  const oldValue = pos.value;
-  let logLine;
 
-  // Stack effect: jump to the next-higher player's score (no field-symbol calc)
-  if (card.suit === WILD && card.effect === 'stack') {
-    state.field.push({ playerId, card, fromDummy: false });
-    const aboveScores = state.positions
-      .filter(p => p.playerId !== playerId && p.value > pos.value)
-      .map(p => p.value)
-      .sort((a, b) => a - b);
-    if (aboveScores.length > 0) {
-      pos.value = aboveScores[0];
-      logLine = `${player.name} ▷ ${formatCard(card)} (上載 ${oldValue}→${pos.value})`;
-    } else {
-      logLine = `${player.name} ▷ ${formatCard(card)} (上に乗るプレイヤーなし／移動なし)`;
-    }
-  } else {
-    // Compute BEFORE pushing to field, so own card is NOT counted in same-suit
-    const score = computeScore(card);
-    state.field.push({ playerId, card, fromDummy: false });
-    pos.value += score;
-    logLine = `${player.name} ▷ ${formatCard(card)} (+${score}) → ${pos.value}`;
-  }
+  // Compute BEFORE pushing to field, so own card is NOT counted in same-suit
+  const score = computeScore(card);
+  state.field.push({ playerId, card, fromDummy: false });
+  pos.value += score;
+  const logLine = `${player.name} ▷ ${formatCard(card)} (+${score}) → ${pos.value}`;
 
   // Update placedAt to the latest among all positions
   let maxPA = 0;

@@ -125,34 +125,81 @@ function renderPlayers() {
 
 function renderDummies() {
   const ul = $('dummy-list');
-  ul.innerHTML = '';
   if (state.dummies.length === 0) {
     ul.innerHTML = '<li style="font-size: 12px; color: var(--ink-soft); font-style: italic;">なし（4-5人プレイ）</li>';
     return;
   }
+  // Track per-dummy reveal state so we only re-render (and flip-animate) on change.
+  const flipped = new Set();
   for (const d of state.dummies) {
-    const li = document.createElement('li');
-    li.className = 'dummy-item';
-    const cardHTML = d.revealed ? cardHTMLString(d.revealed, 'small') : '<span style="font-size: 11px; color: var(--ink-soft);">未公開</span>';
-    li.innerHTML = `<span class="label">${d.id}</span>${cardHTML}<span style="font-size: 11px; color: var(--ink-soft); margin-left:auto;">山${d.deck.length}</span>`;
-    ul.appendChild(li);
+    const cardKey = d.revealed ? `${d.revealed.suit}${d.revealed.value}${d.revealed.effect || ''}` : '';
+    let li = ul.querySelector(`[data-dummy-id="${d.id}"]`);
+    const prevKey = li ? li.dataset.cardKey || '' : '';
+    if (li && prevKey === cardKey) {
+      // Just refresh deck count
+      const deckSpan = li.querySelector('.dummy-deck');
+      if (deckSpan) deckSpan.textContent = `山${d.deck.length}`;
+      continue;
+    }
+    if (!li) {
+      li = document.createElement('li');
+      li.className = 'dummy-item';
+      li.dataset.dummyId = d.id;
+      ul.appendChild(li);
+    }
+    li.dataset.cardKey = cardKey;
+    let cardHTML;
+    if (d.revealed) {
+      cardHTML = `
+        <div class="card card-img-wrap small">
+          <div class="flip-card${prevKey === '' ? ' flipped' : ''}">
+            <div class="flip-face flip-back"><img class="card-img" src="assets/cards/hand/back.webp" alt="裏"></div>
+            <div class="flip-face flip-front"><img class="card-img" src="${cardImagePath(d.revealed, 'hand')}" alt="${d.revealed.value}"></div>
+          </div>
+        </div>
+      `;
+      if (prevKey === '') flipped.add(li);
+    } else {
+      cardHTML = cardBackHTML('small');
+    }
+    li.innerHTML = `<span class="label">${d.id}</span>${cardHTML}<span class="dummy-deck" style="font-size: 11px; color: var(--ink-soft); margin-left:auto;">山${d.deck.length}</span>`;
+  }
+  // Trigger flip animations on next frame for freshly-revealed cards.
+  if (flipped.size) {
+    requestAnimationFrame(() => {
+      for (const li of flipped) {
+        const fc = li.querySelector('.flip-card');
+        if (fc) fc.classList.remove('flipped');
+      }
+    });
   }
 }
 
 function renderGoal() {
   $('round-info').textContent = `Battle ${state.currentRound} / ${state.maxRounds}`;
   const div = $('goal-card-display');
-  if (state.goalCard) {
-    const c = state.goalCard;
-    div.style.borderColor = `var(--suit-${c.suit.toLowerCase()})`;
-    div.innerHTML = `
-      <div class="gv" style="color: var(--suit-${c.suit.toLowerCase()})">${c.value}</div>
-      <div class="gs" style="color: var(--suit-${c.suit.toLowerCase()})">${SUIT_GLYPHS[c.suit]}</div>
-      <div class="gname" style="color: var(--suit-${c.suit.toLowerCase()})">${SUIT_LABELS[c.suit]}</div>
-    `;
-  } else {
+  if (!state.goalCard) {
+    div.classList.remove('has-img');
     div.innerHTML = '<span class="muted">—</span>';
+    div.dataset.cardKey = '';
+    return;
   }
+  const c = state.goalCard;
+  const cardKey = `${c.suit}${c.value}`;
+  if (div.dataset.cardKey === cardKey) return;  // unchanged, skip re-render
+  div.dataset.cardKey = cardKey;
+  div.classList.add('has-img');
+  div.style.borderColor = `var(--suit-${c.suit.toLowerCase()})`;
+  div.innerHTML = `
+    <div class="flip-card flipped">
+      <div class="flip-face flip-back"><img class="card-img" src="assets/cards/goal/back.webp" alt="裏"></div>
+      <div class="flip-face flip-front"><img class="card-img" src="${cardImagePath(c, 'goal')}" alt="${c.value} ${SUIT_LABELS[c.suit]}"></div>
+    </div>
+  `;
+  requestAnimationFrame(() => {
+    const fc = div.querySelector('.flip-card');
+    if (fc) fc.classList.remove('flipped');
+  });
 }
 
 function renderBoard() {
@@ -214,12 +261,27 @@ function renderField() {
   }
 }
 
-function cardHTMLString(card, size) {
-  const cls = `card${size === 'small' ? ' small' : ''} suit-${card.suit.toLowerCase()}`;
-  const eff = (card.suit === WILD && card.effect)
-    ? `<div class="e">${WILD_EFFECT_LABELS[card.effect]}</div>`
-    : '';
-  return `<div class="${cls}"><div class="v">${card.value}</div><div class="s">${SUIT_GLYPHS[card.suit]}</div>${eff}</div>`;
+function cardImagePath(card, kind = 'hand') {
+  if (card.suit === WILD) {
+    if (card.effect === 'round') return 'assets/cards/hand/W-round.webp';
+    if (card.effect === 'draw')  return 'assets/cards/hand/W-draw.webp';
+    return 'assets/cards/hand/W-plain.webp';
+  }
+  return `assets/cards/${kind}/${card.suit}${card.value}.webp`;
+}
+
+function cardBackHTML(size, kind = 'hand') {
+  const cls = `card card-img-wrap${size === 'small' ? ' small' : ''}`;
+  return `<div class="${cls}"><img class="card-img" src="assets/cards/${kind}/back.webp" alt="裏"></div>`;
+}
+
+function cardHTMLString(card, size, kind = 'hand') {
+  const cls = `card card-img-wrap${size === 'small' ? ' small' : ''} suit-${card.suit.toLowerCase()}`;
+  const src = cardImagePath(card, kind);
+  const alt = card.suit === WILD
+    ? `${card.value} ✣${card.effect ? ' ' + WILD_EFFECT_LABELS[card.effect] : ''}`
+    : `${card.value} ${SUIT_LABELS[card.suit]}`;
+  return `<div class="${cls}"><img class="card-img" src="${src}" alt="${alt}" loading="lazy"></div>`;
 }
 
 function renderHand() {
@@ -243,13 +305,14 @@ function renderHand() {
 
   for (const { c, i } of indexed) {
     const cardEl = document.createElement('div');
-    cardEl.className = `card hand-card suit-${c.suit.toLowerCase()}`;
+    cardEl.className = `card card-img-wrap hand-card suit-${c.suit.toLowerCase()}`;
     if (state.selectedCardIdx === i) cardEl.classList.add('selected');
     if (!isMyTurn) cardEl.classList.add('disabled');
-    const eff = (c.suit === WILD && c.effect)
-      ? `<div class="e">${WILD_EFFECT_LABELS[c.effect]}</div>`
-      : '';
-    cardEl.innerHTML = `<div class="v">${c.value}</div><div class="s">${SUIT_GLYPHS[c.suit]}</div>${eff}`;
+    const src = cardImagePath(c, 'hand');
+    const alt = c.suit === WILD
+      ? `${c.value} ✣${c.effect ? ' ' + WILD_EFFECT_LABELS[c.effect] : ''}`
+      : `${c.value} ${SUIT_LABELS[c.suit]}`;
+    cardEl.innerHTML = `<img class="card-img" src="${src}" alt="${alt}" loading="lazy">`;
     if (c.suit === WILD && c.effect) {
       cardEl.title = WILD_EFFECT_DESC[c.effect];
     }
@@ -275,8 +338,8 @@ function renderMyGoals() {
   } else {
     for (const c of me.goalCards) {
       const m = document.createElement('div');
-      m.className = `goal-mini suit-${c.suit.toLowerCase()}`;
-      m.innerHTML = `<span class="gv">${c.value}</span><span class="gs">${SUIT_GLYPHS[c.suit]}</span>`;
+      m.className = `goal-mini card-img-wrap suit-${c.suit.toLowerCase()}`;
+      m.innerHTML = `<img class="card-img" src="${cardImagePath(c, 'goal')}" alt="${c.value} ${SUIT_LABELS[c.suit]}">`;
       div.appendChild(m);
     }
   }

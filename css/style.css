@@ -247,8 +247,8 @@ header .tag {
   gap: 8px;
 }
 .goal-card {
-  width: 110px;
-  height: 150px;
+  width: 100px;
+  height: 165px;
   background: var(--paper);
   border: 2px solid var(--green-deep);
   border-radius: 4px;
@@ -437,7 +437,7 @@ header .tag {
 /* Card styles */
 .card {
   width: 48px;
-  height: 68px;
+  height: 80px;
   border-radius: 3px;
   background: var(--paper);
   border: 1.5px solid var(--ink);
@@ -467,7 +467,7 @@ header .tag {
 .card.suit-e { border-color: var(--suit-e); color: var(--suit-e); }
 .card.suit-w { border-color: var(--suit-w); color: var(--suit-w); background: repeating-linear-gradient(45deg, var(--paper) 0 6px, var(--paper-shade) 6px 12px); }
 
-.card.small { width: 36px; height: 52px; padding: 3px 1px; }
+.card.small { width: 36px; height: 60px; padding: 3px 1px; }
 .card.small .v { font-size: 16px; }
 .card.small .s { font-size: 12px; }
 .card .e {
@@ -479,6 +479,94 @@ header .tag {
 }
 .card.small .e { font-size: 7px; }
 .card.suit-w .e { color: var(--suit-w); font-weight: 600; font-style: normal; }
+
+/* Image-mode card: image fills the .card box, padding/border/background removed. */
+.card.card-img-wrap {
+  display: block;
+  padding: 0;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.card.card-img-wrap.suit-w { background: transparent; }
+.card.card-img-wrap .card-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.card.card-img-wrap .v,
+.card.card-img-wrap .s,
+.card.card-img-wrap .e { display: none; }
+/* Selected highlight uses ring + lift, no longer relies on border color */
+.card.card-img-wrap.hand-card.selected {
+  outline: 3px solid var(--hl);
+  outline-offset: 1px;
+}
+
+/* Big goal card: switch to image mode when has-img */
+.goal-card.has-img {
+  display: block;
+  background: transparent;
+  overflow: hidden;
+  padding: 0;
+  border-width: 2px;
+}
+.goal-card.has-img::before,
+.goal-card.has-img::after { display: none; }
+.goal-card.has-img .card-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Flip animation: card starts face-down (flipped), animates to face-up. */
+.flip-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(.4, .1, .25, 1.2);
+}
+.flip-card.flipped { transform: rotateY(180deg); }
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.flip-face .card-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.flip-back { transform: rotateY(180deg); }
+
+/* Mini goal cards collected by the player */
+.goal-mini.card-img-wrap {
+  display: block;
+  padding: 0;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  border-radius: 3px;
+}
+.goal-mini.card-img-wrap .card-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.goal-mini.card-img-wrap .gv,
+.goal-mini.card-img-wrap .gs { display: none; }
 
 /* Hand */
 .hand-section {
@@ -511,8 +599,8 @@ header .tag {
 }
 .card.hand-card {
   cursor: pointer;
-  width: 56px;
-  height: 80px;
+  width: 60px;
+  height: 100px;
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .card.hand-card .v { font-size: 26px; }
@@ -592,7 +680,7 @@ header .tag {
 }
 .goal-mini {
   width: 30px;
-  height: 42px;
+  height: 50px;
   border: 1.5px solid currentColor;
   border-radius: 2px;
   background: var(--paper);

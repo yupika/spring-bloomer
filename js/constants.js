@@ -12,33 +12,30 @@ const SUIT_GLYPHS = {
 
 // Per-player deck breakdown (35 cards)
 const DECK_SPEC = {
-  A: [3, 4, 5, 6],
-  B: [2, 3, 3, 4, 5],
-  C: [1, 2, 3, 3, 4, 4],
-  D: [1, 1, 2, 2, 3, 3, 4],
+  A: [3, 4, 6, 7],
+  B: [2, 3, 3, 5, 6],
+  C: [2, 2, 3, 3, 4, 4],
+  D: [1, 2, 2, 2, 3, 3, 4],
   E: [1, 1, 1, 2, 2, 3, 3, 3],
 };
 // Wild cards have special effects.
 // effect:
 //   'round' = card value becomes current round number when played
-//   'stack' = chip moves to the score of the next-higher player (same score)
 //   'draw'  = after playing, draw 1 from your deck
 //   null    = no special effect
 const WILD_TEMPLATES = [
   { value: 0, effect: 'round' },
-  { value: 0, effect: 'stack' },
+  { value: 1, effect: 'draw' },
   { value: 1, effect: 'draw' },
   { value: 1, effect: 'draw' },
   { value: 6, effect: null },
 ];
 const WILD_EFFECT_LABELS = {
   round: '=R',
-  stack: '↑載',
   draw: '+引',
 };
 const WILD_EFFECT_DESC = {
   round: '現在のラウンドと同じ値になる',
-  stack: '一つ上のプレイヤーと同スコアになる',
   draw: '出した後にデッキから1枚引く',
 };
 

@@ -150,7 +150,6 @@ export function processSimultaneousReveal(state) {
 export function computeScore(state, card, excludeOwn = false) {
   if (card.suit === WILD) {
     if (card.effect === 'round') return state.currentRound;
-    if (card.effect === 'stack') return 0;
     return card.value;
   }
   const goalSuit = state.goalCard.suit;
@@ -189,17 +188,9 @@ export function playCard(state, playerId, cardIdx) {
   player.hand.splice(cardIdx, 1);
   const pos = state.positions.find(p => p.playerId === playerId);
 
-  if (card.suit === WILD && card.effect === 'stack') {
-    state.field.push({ playerId, card, fromDummy: false });
-    const aboveScores = state.positions
-      .filter(p => p.playerId !== playerId && p.value > pos.value)
-      .map(p => p.value).sort((a, b) => a - b);
-    if (aboveScores.length > 0) pos.value = aboveScores[0];
-  } else {
-    const score = computeScore(state, card);
-    state.field.push({ playerId, card, fromDummy: false });
-    pos.value += score;
-  }
+  const score = computeScore(state, card);
+  state.field.push({ playerId, card, fromDummy: false });
+  pos.value += score;
 
   let maxPA = 0;
   for (const p of state.positions) if (p.placedAt > maxPA) maxPA = p.placedAt;
