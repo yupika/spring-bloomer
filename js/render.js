@@ -13,8 +13,11 @@ function render() {
   $('game').classList.toggle('hidden', state.phase === 'setup' || state.phase === 'gameOver');
   $('result').classList.toggle('hidden', state.phase !== 'gameOver');
   $('tab-nav').classList.toggle('hidden', state.phase === 'setup' || state.phase === 'gameOver');
+  const banner = $('turn-banner');
+  if (banner) banner.classList.toggle('hidden', state.phase === 'setup' || state.phase === 'gameOver');
 
   if (state.phase === 'setup') {
+    _prevHandMultiset = null;  // fresh hand will animate in on next game
     if (typeof renderLobbyOrSetup === 'function') renderLobbyOrSetup();
     return;
   }
@@ -242,6 +245,28 @@ function renderBoard() {
 function renderField() {
   const div = $('field-cards');
   div.innerHTML = '';
+
+  // During multiplayer reveal phase, show face-down placeholders for opponents
+  // who have already submitted (their card content is hidden until reveal).
+  if (state.phase === 'reveal' && state.mode === 'multi') {
+    const submitted = state.players.filter(p =>
+      p.id !== state.mySeat && (p.simSubmitted || p.simChoice));
+    if (submitted.length === 0 && state.field.length === 0) {
+      div.innerHTML = '<span style="font-size: 12px; color: var(--ink-soft); font-style: italic;">他のプレイヤーが選択中…</span>';
+      return;
+    }
+    for (const p of submitted) {
+      const wrap = document.createElement('div');
+      wrap.className = 'field-card submitted';
+      wrap.innerHTML = `<span class="owner">${p.name}</span>${cardBackHTML('small')}<div class="marker">提出済み</div>`;
+      div.appendChild(wrap);
+    }
+    if (submitted.length === 0) {
+      div.innerHTML = '<span style="font-size: 12px; color: var(--ink-soft); font-style: italic;">他のプレイヤーが選択中…</span>';
+    }
+    return;
+  }
+
   if (state.field.length === 0) {
     div.innerHTML = '<span style="font-size: 12px; color: var(--ink-soft); font-style: italic;">カードはまだ場に出ていません</span>';
     return;
@@ -284,6 +309,19 @@ function cardHTMLString(card, size, kind = 'hand') {
   return `<div class="${cls}"><img class="card-img" src="${src}" alt="${alt}" loading="lazy"></div>`;
 }
 
+// Tracks the previous hand as a multiset so newly drawn cards can flip in.
+let _prevHandMultiset = null;
+
+function _handKey(c) { return c.suit + c.value + (c.effect || ''); }
+function _handToMultiset(hand) {
+  const m = new Map();
+  for (const c of hand) {
+    const k = _handKey(c);
+    m.set(k, (m.get(k) || 0) + 1);
+  }
+  return m;
+}
+
 function renderHand() {
   const me = state.players[state.mySeat];
   $('hand-count').textContent = me.hand.length;
@@ -291,6 +329,12 @@ function renderHand() {
 
   const div = $('hand-cards');
   div.innerHTML = '';
+
+  if (me.hand.length === 0) {
+    div.innerHTML = '<span style="font-size: 13px; color: var(--ink-soft); font-style: italic;">手札なし（自動的に降りる扱い）</span>';
+    _prevHandMultiset = new Map();
+    return;
+  }
 
   // Display sorted by suit then value, but track original index
   const indexed = me.hand.map((c, i) => ({ c, i }));
@@ -303,6 +347,11 @@ function renderHand() {
   const isMyTurn = (state.phase === 'reveal' && !alreadySubmitted) ||
                    (state.phase === 'bidding' && state.currentTurnPlayerId === state.mySeat);
 
+  // Compare against previous hand to detect freshly drawn cards.
+  const prev = new Map(_prevHandMultiset || []);
+  const toFlip = [];
+  let staggerIdx = 0;
+
   for (const { c, i } of indexed) {
     const cardEl = document.createElement('div');
     cardEl.className = `card card-img-wrap hand-card suit-${c.suit.toLowerCase()}`;
@@ -312,10 +361,26 @@ function renderHand() {
     const alt = c.suit === WILD
       ? `${c.value} ✣${c.effect ? ' ' + WILD_EFFECT_LABELS[c.effect] : ''}`
       : `${c.value} ${SUIT_LABELS[c.suit]}`;
-    cardEl.innerHTML = `<img class="card-img" src="${src}" alt="${alt}" loading="lazy">`;
-    if (c.suit === WILD && c.effect) {
-      cardEl.title = WILD_EFFECT_DESC[c.effect];
+
+    const k = _handKey(c);
+    const prevCount = prev.get(k) || 0;
+    const isFreshlyDrawn = prevCount === 0;
+    if (!isFreshlyDrawn) prev.set(k, prevCount - 1);
+
+    if (isFreshlyDrawn) {
+      const delay = staggerIdx * 140;
+      staggerIdx++;
+      cardEl.innerHTML = `
+        <div class="flip-card flipped" style="transition-delay: ${delay}ms;">
+          <div class="flip-face flip-back"><img class="card-img" src="assets/cards/hand/back.webp" alt=""></div>
+          <div class="flip-face flip-front"><img class="card-img" src="${src}" alt="${alt}"></div>
+        </div>`;
+      toFlip.push(cardEl);
+    } else {
+      cardEl.innerHTML = `<img class="card-img" src="${src}" alt="${alt}" loading="lazy">`;
     }
+
+    if (c.suit === WILD && c.effect) cardEl.title = WILD_EFFECT_DESC[c.effect];
     cardEl.addEventListener('click', () => {
       if (!isMyTurn) return;
       state.selectedCardIdx = (state.selectedCardIdx === i) ? null : i;
@@ -324,9 +389,17 @@ function renderHand() {
     div.appendChild(cardEl);
   }
 
-  if (me.hand.length === 0) {
-    div.innerHTML = '<span style="font-size: 13px; color: var(--ink-soft); font-style: italic;">手札なし（自動的に降りる扱い）</span>';
+  // Trigger the flip on next frame so the transition fires.
+  if (toFlip.length) {
+    requestAnimationFrame(() => {
+      for (const el of toFlip) {
+        const fc = el.querySelector('.flip-card');
+        if (fc) fc.classList.remove('flipped');
+      }
+    });
   }
+
+  _prevHandMultiset = _handToMultiset(me.hand);
 }
 
 function renderMyGoals() {
@@ -363,6 +436,17 @@ function renderMyGoals() {
   $('win-hint').innerHTML = `合計 <strong>${totalPts}</strong>点 ／ 異なるスート ${distinctSuits} 種<br>勝利条件: 同スート3枚 or 異なる ${required} 種`;
 }
 
+function setTurnBanner(text, variant) {
+  const b = $('turn-banner');
+  const t = $('turn-banner-text');
+  if (!b || !t) return;
+  if (!text) { b.classList.add('hidden'); return; }
+  b.classList.remove('hidden');
+  b.classList.remove('my-turn', 'submitted', 'waiting');
+  if (variant) b.classList.add(variant);
+  t.textContent = text;
+}
+
 function renderPhase() {
   const txt = $('phase-text');
   const playBtn = $('play-btn');
@@ -376,18 +460,17 @@ function renderPhase() {
 
   if (state.phase === 'reveal') {
     if (state.mode === 'multi' && me.simChoice) {
-      // I've already submitted; show waiting state
       const total = state.players.length;
       const submitted = state.players.filter(p => p.simChoice).length;
-      // For others' simChoice we can only see our own due to reveal-phase filtering,
-      // so derive remaining from positions or fall back to a generic message.
       txt.innerHTML = `<strong>同時出しフェイズ</strong> ／ 提出済み<br><span class="muted">他のプレイヤーを待っています…（${submitted} / ${total} 名以上）</span>`;
+      setTurnBanner(`✓ 提出済み — 他のプレイヤーを待っています (${submitted}/${total})`, 'submitted');
       playBtn.disabled = true;
     } else {
       const note = state.mode === 'multi'
         ? '手札からカードを選んで「出す」を押す。他のプレイヤーが選択するまで待ちます。'
         : '手札からカードを選んで「出す」を押す。CPUは既に選択済み。';
       txt.innerHTML = `<strong>同時出しフェイズ</strong> ／ 親 ${state.players[state.parentIdx].name}<br><span class="muted">${note}</span>`;
+      setTurnBanner('▶ 同時出し — カードを選んでください', 'my-turn');
       playBtn.disabled = state.selectedCardIdx === null || me.hand.length === 0;
       playBtn.textContent = '出す';
     }
@@ -408,6 +491,7 @@ function renderPhase() {
         const cardsRemain = me.hand.length;
         txt.innerHTML = `<strong>▶ あなたの手番です</strong>（最下位） ／ 位置 ${myPos.value} ／ 残り ${WIN_THRESHOLD - myPos.value} で勝利<br><span class="muted">出すか降りるかを選択（最下位を抜けるまで複数枚出してOK）／手札 ${cardsRemain}枚</span>`;
       }
+      setTurnBanner('▶ あなたの手番です', 'my-turn');
       playBtn.disabled = state.selectedCardIdx === null || me.hand.length === 0;
       playBtn.textContent = '出す';
       endTurnBtn.disabled = !ableToEnd;
@@ -415,11 +499,16 @@ function renderPhase() {
     } else if (cur) {
       const note = state.mode === 'multi' ? '相手の入力待ち' : 'CPU思考中';
       txt.innerHTML = `<strong>${cur.name} の手番</strong>...<br><span class="muted">${note}</span>`;
+      setTurnBanner(`${cur.name} の手番 — ${note}`, 'waiting');
     } else {
       txt.textContent = '...';
+      setTurnBanner('', null);
     }
   } else if (state.phase === 'battleEnd') {
     txt.innerHTML = `<strong>バトル終了</strong> ／ 次バトル準備中…`;
+    setTurnBanner('バトル終了 — 次バトル準備中…', 'waiting');
+  } else {
+    setTurnBanner('', null);
   }
 }
 

@@ -57,6 +57,38 @@ header .tag {
 }
 .muted { color: var(--ink-soft); font-style: italic; }
 
+/* Sticky turn indicator — always visible during play */
+.turn-banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 8px 24px;
+  text-align: center;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  background: var(--paper-shade);
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-soft);
+  transition: background 0.2s, color 0.2s;
+}
+.turn-banner.hidden { display: none; }
+.turn-banner.my-turn {
+  background: linear-gradient(90deg, var(--green-deep), #4a7d54);
+  color: #fff8e8;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.turn-banner.submitted {
+  background: #e7f0e0;
+  color: var(--green-deep);
+}
+.turn-banner.waiting {
+  background: var(--paper-shade);
+  color: var(--ink-soft);
+}
+
 /* Setup Screen */
 #setup {
   max-width: 720px;
@@ -1018,6 +1050,13 @@ header .tag {
 .field-card.dummy .owner {
   color: var(--suit-w);
   font-style: italic;
+}
+.field-card.submitted {
+  opacity: 0.95;
+}
+.field-card.submitted .marker {
+  color: var(--green-deep);
+  font-weight: 600;
 }
 .field-card .marker {
   font-size: 9px;

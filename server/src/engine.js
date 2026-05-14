@@ -313,6 +313,8 @@ export function serializeStateFor(state, viewerSeat) {
         // or to everyone once we leave the reveal phase.
         hand: isSelf ? p.hand : null,
         simChoice: (isSelf || state.phase !== 'reveal') ? p.simChoice : null,
+        // During reveal phase, opponents see a boolean instead of the card itself.
+        simSubmitted: !!p.simChoice,
       };
     }),
     yourSeat: viewerSeat,
