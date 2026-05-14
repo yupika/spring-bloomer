@@ -9,9 +9,9 @@
   --green-leaf: #6a8e5a;
   --suit-a: #b73e5e;
   --suit-b: #c89018;
-  --suit-c: #3f6e9a;
+  --suit-c: #4f7355;
   --suit-d: #6b4d7a;
-  --suit-e: #4f7355;
+  --suit-e: #3f6e9a;
   --suit-w: #6e6657;
   --hl: #d9b441;
 }
@@ -498,6 +498,16 @@ header .tag {
 .card.suit-d { border-color: var(--suit-d); color: var(--suit-d); }
 .card.suit-e { border-color: var(--suit-e); color: var(--suit-e); }
 .card.suit-w { border-color: var(--suit-w); color: var(--suit-w); background: repeating-linear-gradient(45deg, var(--paper) 0 6px, var(--paper-shade) 6px 12px); }
+
+/* シロツメクサ：白い花なのでグリフだけ白ヌキ（数字とボーダーは緑のまま） */
+.card.suit-c .s,
+.goal-mini.suit-c .gs,
+.suit-tally .st.suit-c .glyph,
+.manual-table td.sym.suit-c {
+  color: #fff;
+  -webkit-text-stroke: 0.6px var(--suit-c);
+  text-shadow: 0 0 1px var(--suit-c);
+}
 
 .card.small { width: 36px; height: 60px; padding: 3px 1px; }
 .card.small .v { font-size: 16px; }
