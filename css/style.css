@@ -399,11 +399,17 @@ header .tag {
 .cell.ladybug-cell { background: #fff0e0; }
 .cell .ladybug {
   position: absolute;
-  top: 1px;
-  right: 1px;
-  font-size: 11px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
   line-height: 1;
   pointer-events: none;
+  z-index: 1;
+}
+.cell.ladybug-cell .num {
+  color: var(--ink-soft);
+  opacity: 0.7;
 }
 .chips {
   display: flex;
