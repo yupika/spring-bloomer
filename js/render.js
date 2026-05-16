@@ -39,20 +39,23 @@ function renderSuitTally() {
   const div = $('suit-tally');
   if (!div) return;
   div.innerHTML = '';
-  // Only the 5 real flower suits — wild (✣) is not counted toward suit bonuses.
-  const counts = {};
-  for (const s of SUITS) counts[s] = 0;
+  // Boost = (# of same-suit cards on field) + (1 if this suit is the goal suit).
+  // Wild (✣) is not counted toward any suit bonus.
+  const fieldCount = {};
+  for (const s of SUITS) fieldCount[s] = 0;
   for (const f of state.field) {
-    if (f.card.suit !== WILD) counts[f.card.suit]++;
+    if (f.card.suit !== WILD) fieldCount[f.card.suit]++;
   }
   const goalSuit = state.goalCard ? state.goalCard.suit : null;
   for (const s of SUITS) {
-    const n = counts[s];
+    const fc = fieldCount[s];
     const isGoal = s === goalSuit;
-    const cls = `st suit-${s.toLowerCase()}${n === 0 ? ' zero' : ''}${isGoal ? ' goal' : ''}`;
-    const title = `${SUIT_LABELS[s]}: 場に ${n} 枚${isGoal ? '（目的スート）' : ''}`;
+    const boost = fc + (isGoal ? 1 : 0);
+    const cls = `st suit-${s.toLowerCase()}${boost === 0 ? ' zero' : ''}${isGoal ? ' goal' : ''}`;
+    const goalNote = isGoal ? `（得点札 +1 ／ 場 ${fc}）` : `（場 ${fc}）`;
+    const title = `${SUIT_LABELS[s]}: +${boost} ブースト${goalNote}`;
     div.insertAdjacentHTML('beforeend',
-      `<span class="${cls}" style="color: var(--suit-${s.toLowerCase()})" title="${title}"><span class="glyph">${SUIT_GLYPHS[s]}</span><span class="count">${n}</span></span>`);
+      `<span class="${cls}" style="color: var(--suit-${s.toLowerCase()})" title="${title}"><span class="glyph">${SUIT_GLYPHS[s]}</span><span class="count">+${boost}</span></span>`);
   }
 }
 
