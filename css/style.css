@@ -518,7 +518,7 @@ header .tag {
 .card.suit-c .s,
 .goal-mini.suit-c .gs,
 .suit-tally .st.suit-c .glyph,
-.manual-table td.sym.suit-c {
+.manual-table .sym.suit-c {
   color: #ffffff;
   text-shadow:
     0 0 1px rgba(0, 0, 0, 0.55),
