@@ -5,8 +5,21 @@
 import { createPlayerDeck, createGoalDeck } from './deck.js';
 import {
   HAND_SIZE, WIN_THRESHOLD, WILD,
-  DISTINCT_SUITS_REQUIRED, maxRoundsFor, dummyCountFor,
+  DISTINCT_SUITS_REQUIRED, maxRoundsFor, dummyCountFor, LADYBUG_RULE,
 } from './constants.js';
+
+// Ladybug rule: if a chip lands on the cell where the ladybug sits
+// (cell == current round number), adjust position per LADYBUG_RULE.
+function applyLadybugRule(state, pos) {
+  if (LADYBUG_RULE === 'none') return;
+  if (state.ladybugPos == null) return;
+  if (pos.value !== state.ladybugPos) return;
+  if (LADYBUG_RULE === 'jump') {
+    pos.value = state.ladybugPos + 1;
+  } else if (LADYBUG_RULE === 'stop') {
+    pos.value = Math.max(0, state.ladybugPos - 1);
+  }
+}
 
 // -------- state construction --------
 
@@ -65,6 +78,7 @@ export function startNewBattle(state) {
   state.phase = 'reveal';
   state.field = [];
   state.positions = state.players.map(p => ({ playerId: p.id, value: 0, placedAt: 0 }));
+  state.ladybugPos = state.currentRound;
   state.currentTurnPlayerId = null;
 
   for (const p of state.players) {
@@ -131,7 +145,9 @@ export function processSimultaneousReveal(state) {
     }
     const score = computeScore(state, p.simChoice, true);
     placeCounter++;
-    state.positions[idx] = { playerId: p.id, value: score, placedAt: placeCounter };
+    const newPos = { playerId: p.id, value: score, placedAt: placeCounter };
+    applyLadybugRule(state, newPos);
+    state.positions[idx] = newPos;
   }
 
   // Wild "draw" effect
@@ -191,6 +207,7 @@ export function playCard(state, playerId, cardIdx) {
   const score = computeScore(state, card);
   state.field.push({ playerId, card, fromDummy: false });
   pos.value += score;
+  applyLadybugRule(state, pos);
 
   let maxPA = 0;
   for (const p of state.positions) if (p.placedAt > maxPA) maxPA = p.placedAt;
@@ -295,6 +312,7 @@ export function serializeStateFor(state, viewerSeat) {
     goalCard: state.goalCard,
     field: state.field,
     positions: state.positions,
+    ladybugPos: state.ladybugPos,
     currentTurnPlayerId: state.currentTurnPlayerId,
     winnerId: state.winnerId,
     battleEndCounts: state.battleEndCounts,

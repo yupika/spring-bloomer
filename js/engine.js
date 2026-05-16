@@ -62,6 +62,7 @@ function startNewBattle() {
   state.positions = state.players.map(p => ({
     playerId: p.id, value: 0, placedAt: 0
   }));
+  state.ladybugPos = state.currentRound;  // ladybug occupies cell == current round
   state.selectedCardIdx = null;
   state.currentTurnPlayerId = null;
 
@@ -157,8 +158,10 @@ function processSimultaneousReveal() {
     }
     const score = computeScore(p.simChoice, true);
     placeCounter++;
-    state.positions[idx] = { playerId: p.id, value: score, placedAt: placeCounter };
-    log(`${p.name} スコア ${score} (${formatCard(p.simChoice)})`);
+    const newPos = { playerId: p.id, value: score, placedAt: placeCounter };
+    applyLadybugRule(newPos);
+    state.positions[idx] = newPos;
+    log(`${p.name} スコア ${newPos.value} (${formatCard(p.simChoice)})${newPos.value !== score ? ` ［🐞${score}→${newPos.value}］` : ''}`);
     if (typeof logEvent === 'function') {
       logEvent('sim_choice', {
         seat: p.id,
@@ -210,6 +213,19 @@ function computeScore(card, excludeOwn = false) {
   let score = card.value + same;
   if (card.suit === goalSuit) score += 1;
   return score;
+}
+
+// Ladybug rule: if a chip lands on the ladybug cell, apply jump/stop.
+// Called after pos.value is set/incremented.
+function applyLadybugRule(pos) {
+  if (LADYBUG_RULE === 'none') return;
+  if (state.ladybugPos == null) return;
+  if (pos.value !== state.ladybugPos) return;
+  if (LADYBUG_RULE === 'jump') {
+    pos.value = state.ladybugPos + 1;
+  } else if (LADYBUG_RULE === 'stop') {
+    pos.value = Math.max(0, state.ladybugPos - 1);
+  }
 }
 
 function determineNextBidder() {
@@ -289,8 +305,11 @@ function playCard(playerId, cardIdx) {
   // Compute BEFORE pushing to field, so own card is NOT counted in same-suit
   const score = computeScore(card);
   state.field.push({ playerId, card, fromDummy: false });
-  pos.value += score;
-  const logLine = `${player.name} ▷ ${formatCard(card)} (+${score}) → ${pos.value}`;
+  const valueBeforeBug = pos.value + score;
+  pos.value = valueBeforeBug;
+  applyLadybugRule(pos);
+  const bugTag = pos.value !== valueBeforeBug ? ` ［🐞${valueBeforeBug}→${pos.value}］` : '';
+  const logLine = `${player.name} ▷ ${formatCard(card)} (+${score}) → ${pos.value}${bugTag}`;
 
   // Update placedAt to the latest among all positions
   let maxPA = 0;

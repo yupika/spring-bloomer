@@ -58,6 +58,13 @@ const GOAL_CARD_SPEC = [
 const HAND_SIZE = 6;
 const SCORE_BOARD_MAX = 35;
 const WIN_THRESHOLD = 33;
+
+// Ladybug token: marks the current round number on the score board.
+// When a player chip lands exactly on the ladybug cell, this rule decides:
+//   'jump' — chip skips forward to (ladybugPos + 1)
+//   'stop' — chip stops one cell short (ladybugPos - 1)
+//   'none' — no effect (chip lands normally)
+const LADYBUG_RULE = 'jump';
 const ROUND_LIMITS = { 2: 8, 3: 10, 4: 12, 5: 14 };
 const DUMMY_COUNTS = { 2: 3, 3: 2, 4: 0, 5: 0 };
 // Number of distinct suits required to win (alternative to 3 of same suit)

@@ -258,6 +258,7 @@ function renderLobbyOrSetup() {
 function adoptServerState(s) {
   state.phase = s.phase;
   state.currentRound = s.currentRound;
+  state.ladybugPos = s.ladybugPos;
   state.maxRounds = s.maxRounds;
   state.parentIdx = s.parentIdx;
   state.goalCard = s.goalCard;

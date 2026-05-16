@@ -54,6 +54,9 @@ export const SCORE_BOARD_MAX = 35;
 export const WIN_THRESHOLD = 33;
 export const DISTINCT_SUITS_REQUIRED = 4;
 
+// Ladybug token rule — see js/constants.js for details.
+export const LADYBUG_RULE = 'jump';
+
 // Hardcoded for 2-5p (matches client). For >5p we extrapolate +2 battles per
 // extra seat and 0 dummies.
 const ROUND_LIMITS_TABLE = { 2: 8, 3: 10, 4: 12, 5: 14 };

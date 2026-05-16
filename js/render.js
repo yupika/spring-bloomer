@@ -39,11 +39,14 @@ function renderSuitTally() {
   const div = $('suit-tally');
   if (!div) return;
   div.innerHTML = '';
+  // Only the 5 real flower suits — wild (✣) is not counted toward suit bonuses.
   const counts = {};
-  for (const s of ALL_SUITS) counts[s] = 0;
-  for (const f of state.field) counts[f.card.suit]++;
+  for (const s of SUITS) counts[s] = 0;
+  for (const f of state.field) {
+    if (f.card.suit !== WILD) counts[f.card.suit]++;
+  }
   const goalSuit = state.goalCard ? state.goalCard.suit : null;
-  for (const s of ALL_SUITS) {
+  for (const s of SUITS) {
     const n = counts[s];
     const isGoal = s === goalSuit;
     const cls = `st suit-${s.toLowerCase()}${n === 0 ? ' zero' : ''}${isGoal ? ' goal' : ''}`;
@@ -219,6 +222,15 @@ function renderBoard() {
     num.className = 'num';
     num.textContent = i;
     cell.appendChild(num);
+
+    if (state.ladybugPos === i) {
+      cell.classList.add('ladybug-cell');
+      const bug = document.createElement('span');
+      bug.className = 'ladybug';
+      bug.textContent = '🐞';
+      bug.title = `テントウムシ — ラウンド ${i}`;
+      cell.appendChild(bug);
+    }
 
     const here = state.positions
       .filter(p => p.value === i)
@@ -480,13 +492,9 @@ function renderPhase() {
     if (meIsCurrentTurn) {
       const myPos = state.positions.find(p => p.playerId === state.mySeat);
       const ableToEnd = canEndTurn(state.mySeat);
-      const others = state.positions
-        .filter(p => p.playerId !== state.mySeat && !state.players[p.playerId].droppedOut);
-      const minOther = others.length > 0 ? Math.min.apply(null, others.map(p => p.value)) : 0;
 
       if (ableToEnd) {
-        const margin = myPos.value - minOther;
-        txt.innerHTML = `<strong>▶ あなたの手番です</strong>（最下位は他へ） ／ 位置 ${myPos.value}（次点 ${minOther}、差 +${margin}）<br><span class="muted">続けて出して引き離す／「ターン終了」で次のプレイヤーへ／降りる</span>`;
+        txt.innerHTML = `<strong>▶ あなたの手番です</strong>（最下位は他へ） ／ 位置 ${myPos.value}<br><span class="muted">続けて出して引き離す／「ターン終了」で次のプレイヤーへ／降りる</span>`;
       } else {
         const cardsRemain = me.hand.length;
         txt.innerHTML = `<strong>▶ あなたの手番です</strong>（最下位） ／ 位置 ${myPos.value} ／ 残り ${WIN_THRESHOLD - myPos.value} で勝利<br><span class="muted">出すか降りるかを選択（最下位を抜けるまで複数枚出してOK）／手札 ${cardsRemain}枚</span>`;
