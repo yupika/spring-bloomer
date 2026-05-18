@@ -319,7 +319,7 @@ function renderSimResult(stats) {
         const total = r.scoreOut + r.lastStanding + r.allDropped;
         if (total === 0) return '（データなし）';
         const pct = (n) => `${n} (${(n/total*100).toFixed(1)}%)`;
-        return `30点到達で決着: <strong>${pct(r.scoreOut)}</strong><br>
+        return `${WIN_THRESHOLD}点到達で決着: <strong>${pct(r.scoreOut)}</strong><br>
                 他全員が降りて勝者確定: <strong>${pct(r.lastStanding)}</strong><br>
                 全員降りて勝者なし: <strong>${pct(r.allDropped)}</strong><br>
                 バトル総数: <strong>${total}</strong>`;

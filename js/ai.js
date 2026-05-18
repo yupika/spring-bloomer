@@ -118,21 +118,12 @@ function calculateDesire(player) {
 function effectiveSimValue(card) {
   if (card.suit !== WILD) return card.value;
   if (card.effect === 'round') return state.currentRound;
-  if (card.effect === 'stack') return 0;
   if (card.effect === 'draw') return 1;
   return card.value;
 }
 
 // Movement gained by playing this card on your turn (own NOT counted on field).
 function turnPlayMovement(card, playerId) {
-  if (card.suit === WILD && card.effect === 'stack') {
-    const myPos = state.positions.find(p => p.playerId === playerId);
-    const above = state.positions
-      .filter(p => p.playerId !== playerId && p.value > myPos.value)
-      .map(p => p.value)
-      .sort((a, b) => a - b);
-    return above.length > 0 ? above[0] - myPos.value : 0;
-  }
   return computeScore(card);
 }
 
@@ -437,7 +428,7 @@ function cpuDecideAction(player) {
 
   // Cheap-escape candidates (cards that lift us above the lowest at low cost)
   const escapes = options
-    .filter(o => o.move >= escapeMargin && !(o.c.suit === WILD && o.c.effect === 'stack' && o.move < 2))
+    .filter(o => o.move >= escapeMargin)
     .sort((a, b) => a.cost - b.cost || b.move - a.move);
 
   // === Critical desire: keep pushing ===
@@ -461,15 +452,7 @@ function cpuDecideAction(player) {
 
   // === Standard cost-benefit ===
   options.sort((a, b) => a.cost - b.cost);
-  // Skip stack wild as the pick if it doesn't actually move us much
-  let pickIdx = 0;
-  while (pickIdx < options.length) {
-    const o = options[pickIdx];
-    if (o.c.suit === WILD && o.c.effect === 'stack' && o.move < 3) { pickIdx++; continue; }
-    break;
-  }
-  if (pickIdx >= options.length) pickIdx = 0;
-  const pick = options[pickIdx];
+  const pick = options[0];
 
   // Engage thresholds, scaled by personality and bidding style
   const playThresh = pers.minEngage / bs.engageMultiplier;

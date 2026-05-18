@@ -15,6 +15,10 @@
   <button id="manual-btn-header" class="manual-btn-header" title="ルールブックを開く">📖 ルール</button>
 </header>
 
+<div id="turn-banner" class="turn-banner hidden">
+  <span id="turn-banner-text"></span>
+</div>
+
 <nav id="tab-nav" class="tab-nav hidden">
   <button data-tab="players">🌱 プレイヤー</button>
   <button data-tab="battle" class="active">⚔ バトル</button>
@@ -154,7 +158,7 @@
       </div>
 
       <div class="score-board">
-        <h3 style="margin: 0 0 6px; font-family: 'Cormorant Garamond', serif; font-size: 14px; color: var(--green-deep); letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px dotted var(--rule); padding-bottom: 3px;">スコアボード（30到達で勝利）</h3>
+        <h3 style="margin: 0 0 6px; font-family: 'Cormorant Garamond', serif; font-size: 14px; color: var(--green-deep); letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px dotted var(--rule); padding-bottom: 3px;">スコアボード（33到達で勝利）</h3>
         <div id="board-grid" class="board-grid"></div>
       </div>
 
@@ -198,7 +202,6 @@
         <h3>無色カード早見</h3>
         <div class="wild-key">
           <div class="wild-key-row"><span class="wild-key-tag">0[=R]</span><span>現在のラウンド数になる</span></div>
-          <div class="wild-key-row"><span class="wild-key-tag">0[↑載]</span><span>一つ上のプレイヤーと同点に</span></div>
           <div class="wild-key-row"><span class="wild-key-tag">1[+引]</span><span>素点1、出した後デッキから1枚引く</span></div>
           <div class="wild-key-row"><span class="wild-key-tag">6</span><span>素点6（効果なし）</span></div>
           <div class="wild-note">※ 無色は同スートボーナス対象外。<br>場の数え方も無色は加算されません。</div>
@@ -303,10 +306,18 @@
           <li>「降りる」を選ぶと以降このバトルには参加しない</li>
         </ul>
 
-        <h4>3-3. バトル終了</h4>
+        <h4>3-3. テントウムシ 🐞</h4>
+        <ul>
+          <li>各バトル開始時、スコアボードの<strong>現在のバトル番号と同じマス</strong>にテントウムシが乗る（第3バトルなら3マス目）</li>
+          <li>カード処理の結果、コマがちょうどそのマスに<strong>着地</strong>すると、踏まないよう<strong>1マス先へジャンプ</strong>（実質 +1）</li>
+          <li>マスを通過するだけ（着地点が別マス）の場合は発動しない</li>
+          <li>ジャンプ後の値で最低値判定が行われる</li>
+        </ul>
+
+        <h4>3-4. バトル終了</h4>
         <ul>
           <li>1人を残して全員が降りる → 残ったプレイヤーが勝者</li>
-          <li>スコアが <strong>30点</strong> に到達 → 到達者が勝者</li>
+          <li>スコアが <strong>33点</strong> に到達 → 到達者が勝者</li>
           <li>勝者が得点札を獲得、次バトルへ</li>
         </ul>
       </section>
@@ -349,11 +360,11 @@
         <table class="manual-table">
           <thead><tr><th>花</th><th>記号</th><th>デッキ枚数</th><th>含まれる値</th></tr></thead>
           <tbody>
-            <tr><td>ネジハナ</td><td class="sym suit-a">✿</td><td>4</td><td>3, 4, 5, 6</td></tr>
-            <tr><td>たんぽぽ</td><td class="sym suit-b">❀</td><td>5</td><td>2, 3, 3, 4, 5</td></tr>
-            <tr><td>シロツメクサ</td><td class="sym suit-c">✤</td><td>6</td><td>1, 2, 3, 3, 4, 4</td></tr>
-            <tr><td>スミレ</td><td class="sym suit-d">✾</td><td>7</td><td>1, 1, 2, 2, 3, 3, 4</td></tr>
-            <tr><td>オオイヌノフグリ</td><td class="sym suit-e">☘</td><td>8</td><td>1, 1, 1, 2, 2, 3, 3, 3</td></tr>
+            <tr><td>ネジハナ</td><td class="sym suit-a">✿</td><td>4</td><td>3, 4, 6, 7</td></tr>
+            <tr><td>たんぽぽ</td><td class="sym suit-b">❀</td><td>5</td><td>2, 3, 3, 5, 6</td></tr>
+            <tr><td>シロツメクサ</td><td class="sym suit-c">☘</td><td>6</td><td>2, 2, 3, 3, 4, 4</td></tr>
+            <tr><td>スミレ</td><td class="sym suit-d">✾</td><td>7</td><td>1, 2, 2, 2, 3, 3, 4</td></tr>
+            <tr><td>オオイヌノフグリ</td><td class="sym suit-e">✤</td><td>8</td><td>1, 1, 1, 2, 2, 3, 3, 3</td></tr>
           </tbody>
         </table>
 
@@ -362,8 +373,7 @@
           <thead><tr><th>表記</th><th>枚数</th><th>効果</th></tr></thead>
           <tbody>
             <tr><td>0 ✣ [=R]</td><td>1</td><td>その瞬間の値が現在のラウンド数になる</td></tr>
-            <tr><td>0 ✣ [↑載]</td><td>1</td><td>一つ上のスコアのプレイヤーと同点になる</td></tr>
-            <tr><td>1 ✣ [+引]</td><td>2</td><td>値1。出した後にデッキから1枚引く</td></tr>
+            <tr><td>1 ✣ [+引]</td><td>3</td><td>値1。出した後にデッキから1枚引く</td></tr>
             <tr><td>6 ✣</td><td>1</td><td>値6。効果なし</td></tr>
           </tbody>
         </table>
@@ -375,13 +385,13 @@
           <thead><tr><th>値</th><th>スート</th></tr></thead>
           <tbody>
             <tr><td>1</td><td>✿ ネジハナ</td></tr>
-            <tr><td>2</td><td>❀ たんぽぽ ／ ☘ オオイヌノフグリ</td></tr>
-            <tr><td>3</td><td>✤ シロツメクサ ／ ✾ スミレ ／ ☘ オオイヌノフグリ</td></tr>
-            <tr><td>4</td><td>✿ ネジハナ ／ ✤ シロツメクサ ／ ✾ スミレ ／ ☘ オオイヌノフグリ</td></tr>
-            <tr><td>5</td><td>✿ ／ ❀ ／ ✤ ／ ✾ ／ ☘（全スート）</td></tr>
-            <tr><td>6</td><td>❀ たんぽぽ ／ ✤ シロツメクサ ／ ✾ スミレ</td></tr>
-            <tr><td>7</td><td>✿ ネジハナ ／ ❀ たんぽぽ ／ ✤ シロツメクサ</td></tr>
-            <tr><td>9</td><td>✾ スミレ ／ ☘ オオイヌノフグリ</td></tr>
+            <tr><td>2</td><td>❀ たんぽぽ ／ ✤ オオイヌノフグリ</td></tr>
+            <tr><td>3</td><td><span class="sym suit-c">☘</span> シロツメクサ ／ ✾ スミレ ／ ✤ オオイヌノフグリ</td></tr>
+            <tr><td>4</td><td>✿ ネジハナ ／ <span class="sym suit-c">☘</span> シロツメクサ ／ ✾ スミレ ／ ✤ オオイヌノフグリ</td></tr>
+            <tr><td>5</td><td>✿ ／ ❀ ／ <span class="sym suit-c">☘</span> ／ ✾ ／ ✤（全スート）</td></tr>
+            <tr><td>6</td><td>❀ たんぽぽ ／ <span class="sym suit-c">☘</span> シロツメクサ ／ ✾ スミレ</td></tr>
+            <tr><td>7</td><td>✿ ネジハナ ／ ❀ たんぽぽ ／ <span class="sym suit-c">☘</span> シロツメクサ</td></tr>
+            <tr><td>9</td><td>✾ スミレ ／ ✤ オオイヌノフグリ</td></tr>
             <tr><td>11</td><td>❀ たんぽぽ</td></tr>
             <tr><td>12</td><td>✿ ネジハナ</td></tr>
           </tbody>

@@ -4,6 +4,11 @@ Thumbs.db
 *.swp
 *.swo
 
+# raw card conversion outputs — re-generated from PSDs via tools/convert-psd.py
+# production-ready renamed copies live in assets/cards/{hand,goal}/
+assets/cards/raw/
+assets/cards/preview.html
+
 # wrangler files
 .wrangler
 .dev.vars*

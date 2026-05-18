@@ -258,6 +258,7 @@ function renderLobbyOrSetup() {
 function adoptServerState(s) {
   state.phase = s.phase;
   state.currentRound = s.currentRound;
+  state.ladybugPos = s.ladybugPos;
   state.maxRounds = s.maxRounds;
   state.parentIdx = s.parentIdx;
   state.goalCard = s.goalCard;
@@ -288,6 +289,7 @@ function adoptServerState(s) {
       deck: { length: p.deckCount || 0 },
       hand,
       simChoice: p.simChoice || null,
+      simSubmitted: !!p.simSubmitted,
       personality: null,    // hide CPU personality fields in MP
       resourceMode: null,
       biddingStyle: null,

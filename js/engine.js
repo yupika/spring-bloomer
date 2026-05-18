@@ -62,6 +62,7 @@ function startNewBattle() {
   state.positions = state.players.map(p => ({
     playerId: p.id, value: 0, placedAt: 0
   }));
+  state.ladybugPos = state.currentRound;  // ladybug occupies cell == current round
   state.selectedCardIdx = null;
   state.currentTurnPlayerId = null;
 
@@ -157,8 +158,10 @@ function processSimultaneousReveal() {
     }
     const score = computeScore(p.simChoice, true);
     placeCounter++;
-    state.positions[idx] = { playerId: p.id, value: score, placedAt: placeCounter };
-    log(`${p.name} スコア ${score} (${formatCard(p.simChoice)})`);
+    const newPos = { playerId: p.id, value: score, placedAt: placeCounter };
+    applyLadybugRule(newPos);
+    state.positions[idx] = newPos;
+    log(`${p.name} スコア ${newPos.value} (${formatCard(p.simChoice)})${newPos.value !== score ? ` ［🐞${score}→${newPos.value}］` : ''}`);
     if (typeof logEvent === 'function') {
       logEvent('sim_choice', {
         seat: p.id,
@@ -198,10 +201,6 @@ function processSimultaneousReveal() {
 function computeScore(card, excludeOwn = false) {
   if (card.suit === WILD) {
     if (card.effect === 'round') return state.currentRound;
-    // 'stack' effect produces an absolute jump, handled in playCard;
-    // for sim reveal it contributes 0 (no other player can be "above" in a
-    // useful way during simultaneous placement).
-    if (card.effect === 'stack') return 0;
     // 'draw' wild and the plain 6 just use face value.
     return card.value;
   }
@@ -214,6 +213,19 @@ function computeScore(card, excludeOwn = false) {
   let score = card.value + same;
   if (card.suit === goalSuit) score += 1;
   return score;
+}
+
+// Ladybug rule: if a chip lands on the ladybug cell, apply jump/stop.
+// Called after pos.value is set/incremented.
+function applyLadybugRule(pos) {
+  if (LADYBUG_RULE === 'none') return;
+  if (state.ladybugPos == null) return;
+  if (pos.value !== state.ladybugPos) return;
+  if (LADYBUG_RULE === 'jump') {
+    pos.value = state.ladybugPos + 1;
+  } else if (LADYBUG_RULE === 'stop') {
+    pos.value = Math.max(0, state.ladybugPos - 1);
+  }
 }
 
 function determineNextBidder() {
@@ -289,29 +301,15 @@ function playCard(playerId, cardIdx) {
   player._committedThisBattle = (player._committedThisBattle || 0) + 1;
 
   const pos = state.positions.find(p => p.playerId === playerId);
-  const oldValue = pos.value;
-  let logLine;
 
-  // Stack effect: jump to the next-higher player's score (no field-symbol calc)
-  if (card.suit === WILD && card.effect === 'stack') {
-    state.field.push({ playerId, card, fromDummy: false });
-    const aboveScores = state.positions
-      .filter(p => p.playerId !== playerId && p.value > pos.value)
-      .map(p => p.value)
-      .sort((a, b) => a - b);
-    if (aboveScores.length > 0) {
-      pos.value = aboveScores[0];
-      logLine = `${player.name} ▷ ${formatCard(card)} (上載 ${oldValue}→${pos.value})`;
-    } else {
-      logLine = `${player.name} ▷ ${formatCard(card)} (上に乗るプレイヤーなし／移動なし)`;
-    }
-  } else {
-    // Compute BEFORE pushing to field, so own card is NOT counted in same-suit
-    const score = computeScore(card);
-    state.field.push({ playerId, card, fromDummy: false });
-    pos.value += score;
-    logLine = `${player.name} ▷ ${formatCard(card)} (+${score}) → ${pos.value}`;
-  }
+  // Compute BEFORE pushing to field, so own card is NOT counted in same-suit
+  const score = computeScore(card);
+  state.field.push({ playerId, card, fromDummy: false });
+  const valueBeforeBug = pos.value + score;
+  pos.value = valueBeforeBug;
+  applyLadybugRule(pos);
+  const bugTag = pos.value !== valueBeforeBug ? ` ［🐞${valueBeforeBug}→${pos.value}］` : '';
+  const logLine = `${player.name} ▷ ${formatCard(card)} (+${score}) → ${pos.value}${bugTag}`;
 
   // Update placedAt to the latest among all positions
   let maxPA = 0;

@@ -9,9 +9,9 @@
   --green-leaf: #6a8e5a;
   --suit-a: #b73e5e;
   --suit-b: #c89018;
-  --suit-c: #3f6e9a;
+  --suit-c: #4f7355;
   --suit-d: #6b4d7a;
-  --suit-e: #4f7355;
+  --suit-e: #3f6e9a;
   --suit-w: #6e6657;
   --hl: #d9b441;
 }
@@ -56,6 +56,38 @@ header .tag {
   color: var(--suit-a);
 }
 .muted { color: var(--ink-soft); font-style: italic; }
+
+/* Sticky turn indicator — always visible during play */
+.turn-banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 8px 24px;
+  text-align: center;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  background: var(--paper-shade);
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-soft);
+  transition: background 0.2s, color 0.2s;
+}
+.turn-banner.hidden { display: none; }
+.turn-banner.my-turn {
+  background: linear-gradient(90deg, var(--green-deep), #4a7d54);
+  color: #fff8e8;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.turn-banner.submitted {
+  background: #e7f0e0;
+  color: var(--green-deep);
+}
+.turn-banner.waiting {
+  background: var(--paper-shade);
+  color: var(--ink-soft);
+}
 
 /* Setup Screen */
 #setup {
@@ -247,8 +279,8 @@ header .tag {
   gap: 8px;
 }
 .goal-card {
-  width: 110px;
-  height: 150px;
+  width: 100px;
+  height: 165px;
   background: var(--paper);
   border: 2px solid var(--green-deep);
   border-radius: 4px;
@@ -364,6 +396,21 @@ header .tag {
   border: 2px solid var(--hl);
 }
 .cell.win-mark .num { color: var(--green-deep); font-weight: 700; }
+.cell.ladybug-cell { background: #fff0e0; }
+.cell .ladybug {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 1;
+}
+.cell.ladybug-cell .num {
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -437,7 +484,7 @@ header .tag {
 /* Card styles */
 .card {
   width: 48px;
-  height: 68px;
+  height: 80px;
   border-radius: 3px;
   background: var(--paper);
   border: 1.5px solid var(--ink);
@@ -467,7 +514,18 @@ header .tag {
 .card.suit-e { border-color: var(--suit-e); color: var(--suit-e); }
 .card.suit-w { border-color: var(--suit-w); color: var(--suit-w); background: repeating-linear-gradient(45deg, var(--paper) 0 6px, var(--paper-shade) 6px 12px); }
 
-.card.small { width: 36px; height: 52px; padding: 3px 1px; }
+/* シロツメクサ：白い花なのでグリフだけ完全白（紙背景にうっすら影で輪郭） */
+.card.suit-c .s,
+.goal-mini.suit-c .gs,
+.suit-tally .st.suit-c .glyph,
+.manual-table .sym.suit-c {
+  color: #ffffff;
+  text-shadow:
+    0 0 1px rgba(0, 0, 0, 0.55),
+    0 1px 1.5px rgba(0, 0, 0, 0.25);
+}
+
+.card.small { width: 36px; height: 60px; padding: 3px 1px; }
 .card.small .v { font-size: 16px; }
 .card.small .s { font-size: 12px; }
 .card .e {
@@ -479,6 +537,94 @@ header .tag {
 }
 .card.small .e { font-size: 7px; }
 .card.suit-w .e { color: var(--suit-w); font-weight: 600; font-style: normal; }
+
+/* Image-mode card: image fills the .card box, padding/border/background removed. */
+.card.card-img-wrap {
+  display: block;
+  padding: 0;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.card.card-img-wrap.suit-w { background: transparent; }
+.card.card-img-wrap .card-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.card.card-img-wrap .v,
+.card.card-img-wrap .s,
+.card.card-img-wrap .e { display: none; }
+/* Selected highlight uses ring + lift, no longer relies on border color */
+.card.card-img-wrap.hand-card.selected {
+  outline: 3px solid var(--hl);
+  outline-offset: 1px;
+}
+
+/* Big goal card: switch to image mode when has-img */
+.goal-card.has-img {
+  display: block;
+  background: transparent;
+  overflow: hidden;
+  padding: 0;
+  border-width: 2px;
+}
+.goal-card.has-img::before,
+.goal-card.has-img::after { display: none; }
+.goal-card.has-img .card-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Flip animation: card starts face-down (flipped), animates to face-up. */
+.flip-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(.4, .1, .25, 1.2);
+}
+.flip-card.flipped { transform: rotateY(180deg); }
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.flip-face .card-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.flip-back { transform: rotateY(180deg); }
+
+/* Mini goal cards collected by the player */
+.goal-mini.card-img-wrap {
+  display: block;
+  padding: 0;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  border-radius: 3px;
+}
+.goal-mini.card-img-wrap .card-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.goal-mini.card-img-wrap .gv,
+.goal-mini.card-img-wrap .gs { display: none; }
 
 /* Hand */
 .hand-section {
@@ -511,8 +657,8 @@ header .tag {
 }
 .card.hand-card {
   cursor: pointer;
-  width: 56px;
-  height: 80px;
+  width: 60px;
+  height: 100px;
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .card.hand-card .v { font-size: 26px; }
@@ -592,7 +738,7 @@ header .tag {
 }
 .goal-mini {
   width: 30px;
-  height: 42px;
+  height: 50px;
   border: 1.5px solid currentColor;
   border-radius: 2px;
   background: var(--paper);
@@ -930,6 +1076,13 @@ header .tag {
 .field-card.dummy .owner {
   color: var(--suit-w);
   font-style: italic;
+}
+.field-card.submitted {
+  opacity: 0.95;
+}
+.field-card.submitted .marker {
+  color: var(--green-deep);
+  font-weight: 600;
 }
 .field-card .marker {
   font-size: 9px;
@@ -1321,7 +1474,7 @@ header .tag {
 }
 .manual-table td.sym.suit-a { color: var(--suit-a); }
 .manual-table td.sym.suit-b { color: var(--suit-b); }
-.manual-table td.sym.suit-c { color: var(--suit-c); }
+/* suit-c (シロツメクサ) は白ヌキ。上の .manual-table .sym.suit-c ルール参照 */
 .manual-table td.sym.suit-d { color: var(--suit-d); }
 .manual-table td.sym.suit-e { color: var(--suit-e); }
 .manual-formula {

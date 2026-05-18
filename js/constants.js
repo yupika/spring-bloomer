@@ -7,7 +7,7 @@ const SUIT_LABELS = {
   A: 'ネジハナ', B: 'たんぽぽ', C: 'シロツメクサ', D: 'スミレ', E: 'オオイヌノフグリ', W: 'ワイルド'
 };
 const SUIT_GLYPHS = {
-  A: '✿', B: '❀', C: '✤', D: '✾', E: '☘', W: '✣'
+  A: '✿', B: '❀', C: '☘', D: '✾', E: '✤', W: '✣'
 };
 
 // Per-player deck breakdown (35 cards)
@@ -21,24 +21,21 @@ const DECK_SPEC = {
 // Wild cards have special effects.
 // effect:
 //   'round' = card value becomes current round number when played
-//   'stack' = chip moves to the score of the next-higher player (same score)
 //   'draw'  = after playing, draw 1 from your deck
 //   null    = no special effect
 const WILD_TEMPLATES = [
   { value: 0, effect: 'round' },
-  { value: 0, effect: 'stack' },
+  { value: 1, effect: 'draw' },
   { value: 1, effect: 'draw' },
   { value: 1, effect: 'draw' },
   { value: 6, effect: null },
 ];
 const WILD_EFFECT_LABELS = {
   round: '=R',
-  stack: '↑載',
   draw: '+引',
 };
 const WILD_EFFECT_DESC = {
   round: '現在のラウンドと同じ値になる',
-  stack: '一つ上のプレイヤーと同スコアになる',
   draw: '出した後にデッキから1枚引く',
 };
 
@@ -61,6 +58,13 @@ const GOAL_CARD_SPEC = [
 const HAND_SIZE = 6;
 const SCORE_BOARD_MAX = 35;
 const WIN_THRESHOLD = 33;
+
+// Ladybug token: marks the current round number on the score board.
+// When a player chip lands exactly on the ladybug cell, this rule decides:
+//   'jump' — chip skips forward to (ladybugPos + 1)
+//   'stop' — chip stops one cell short (ladybugPos - 1)
+//   'none' — no effect (chip lands normally)
+const LADYBUG_RULE = 'jump';
 const ROUND_LIMITS = { 2: 8, 3: 10, 4: 12, 5: 14 };
 const DUMMY_COUNTS = { 2: 3, 3: 2, 4: 0, 5: 0 };
 // Number of distinct suits required to win (alternative to 3 of same suit)

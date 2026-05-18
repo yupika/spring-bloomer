@@ -9,21 +9,21 @@ export const SUIT_LABELS = {
   A: 'ネジハナ', B: 'たんぽぽ', C: 'シロツメクサ', D: 'スミレ', E: 'オオイヌノフグリ', W: 'ワイルド'
 };
 export const SUIT_GLYPHS = {
-  A: '✿', B: '❀', C: '✤', D: '✾', E: '☘', W: '✣'
+  A: '✿', B: '❀', C: '☘', D: '✾', E: '✤', W: '✣'
 };
 
 // Per-player deck breakdown (35 cards)
 export const DECK_SPEC = {
-  A: [3, 4, 5, 6],
-  B: [2, 3, 3, 4, 5],
-  C: [1, 2, 3, 3, 4, 4],
-  D: [1, 1, 2, 2, 3, 3, 4],
+  A: [3, 4, 6, 7],
+  B: [2, 3, 3, 5, 6],
+  C: [2, 2, 3, 3, 4, 4],
+  D: [1, 2, 2, 2, 3, 3, 4],
   E: [1, 1, 1, 2, 2, 3, 3, 3],
 };
 
 export const WILD_TEMPLATES = [
   { value: 0, effect: 'round' },
-  { value: 0, effect: 'stack' },
+  { value: 1, effect: 'draw' },
   { value: 1, effect: 'draw' },
   { value: 1, effect: 'draw' },
   { value: 6, effect: null },
@@ -31,7 +31,6 @@ export const WILD_TEMPLATES = [
 
 export const WILD_EFFECT_LABELS = {
   round: '=R',
-  stack: '↑載',
   draw: '+引',
 };
 
@@ -52,8 +51,11 @@ export const GOAL_CARD_SPEC = [
 
 export const HAND_SIZE = 6;
 export const SCORE_BOARD_MAX = 35;
-export const WIN_THRESHOLD = 30;
+export const WIN_THRESHOLD = 33;
 export const DISTINCT_SUITS_REQUIRED = 4;
+
+// Ladybug token rule — see js/constants.js for details.
+export const LADYBUG_RULE = 'jump';
 
 // Hardcoded for 2-5p (matches client). For >5p we extrapolate +2 battles per
 // extra seat and 0 dummies.
