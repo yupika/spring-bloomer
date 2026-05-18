@@ -166,6 +166,138 @@ header .tag {
 .player-options button small { color: var(--ink-soft); font-size: 12px; }
 .player-options button:hover small { color: rgba(244,236,216,0.8); }
 
+/* ===== Landing-style setup screen ===== */
+.hero {
+  text-align: center;
+  margin: 0 0 24px;
+  padding: 0 0 18px;
+  border-bottom: 1px dotted var(--rule);
+}
+.hero-art {
+  display: block;
+  margin: 0 auto;
+  max-width: 280px;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 4px 18px rgba(42,37,25,0.18);
+}
+.hero-wordmark {
+  display: block;
+  margin: 18px auto 4px;
+  max-width: 280px;
+  width: 70%;
+  height: auto;
+}
+.hero-tagline {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-style: italic;
+  line-height: 1.8;
+  margin: 10px 0 0;
+  letter-spacing: 0.04em;
+}
+
+/* CTA card (details/button hybrid) */
+.cta-card {
+  display: block;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 0;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.15s;
+  font-family: inherit;
+  text-align: left;
+  color: var(--ink);
+}
+.cta-card:hover {
+  border-color: var(--green-deep);
+  box-shadow: 0 3px 10px rgba(42,37,25,0.08);
+}
+.cta-card summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+.cta-card summary::-webkit-details-marker { display: none; }
+.cta-card summary::marker { display: none; }
+.cta-card.cta-flat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+}
+.cta-icon {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.cta-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cta-body strong {
+  font-size: 17px;
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  font-weight: 600;
+  color: var(--green-deep);
+  letter-spacing: 0.04em;
+}
+.cta-body small {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.cta-chev {
+  font-size: 14px;
+  color: var(--ink-soft);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+details.cta-card[open] .cta-chev { transform: rotate(180deg); }
+.cta-expanded {
+  padding: 4px 18px 18px;
+  border-top: 1px dotted var(--rule);
+  margin-top: -1px;
+}
+
+/* Advanced (folded) section */
+.advanced-section {
+  margin-top: 18px;
+}
+.advanced-section > summary {
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 8px 4px;
+  user-select: none;
+  list-style: none;
+  letter-spacing: 0.05em;
+}
+.advanced-section > summary::-webkit-details-marker { display: none; }
+.advanced-section > summary::before {
+  content: '▸ ';
+  display: inline-block;
+  transition: transform 0.2s;
+}
+.advanced-section[open] > summary::before {
+  transform: rotate(90deg);
+}
+.advanced-section > summary:hover { color: var(--green-deep); }
+.advanced-body {
+  padding: 6px 0 0;
+}
+
 /* Game Screen */
 #game {
   display: grid;
