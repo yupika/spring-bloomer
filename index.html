@@ -29,38 +29,64 @@
 <main id="app">
   <!-- Setup screen -->
   <section id="setup">
-    <h2>プレイ人数を選んでください</h2>
-    <p class="lede">
-      あなたは<strong>プレイヤー1</strong>として参加します。残りはCPUとダミー山札（ルール準拠で常に5デッキ使用）。<br>
-      <span class="muted">手札は毎バトル開始時に山札から6枚まで補充。同時出し・入札中の手番出しともに、自分のカードのスートは加算対象外（場の他カードのみカウント）。各CPUはゲームごとに違う性格（点数狙い／色集め／コスパ重視／攻撃的／バランス）を持ちます。</span>
-    </p>
+    <div class="hero">
+      <img class="hero-art" src="assets/logo/springbloomer.png" alt="Spring Bloomer">
+      <img class="hero-wordmark" src="assets/logo/springbloomer02.png" alt="Spring Bloomer / スプリングブルーマー">
+      <p class="hero-tagline">野の花たちが繰り広げる、<br>せりと駆け引きの花束づくり。</p>
+    </div>
+
     <div class="name-input-row">
       <label for="player-name-input">プレイヤー名</label>
       <input type="text" id="player-name-input" maxlength="16" placeholder="あなた" autocomplete="off">
     </div>
-    <div class="player-options">
-      <button data-players="2"><strong>2人プレイ</strong><small>あなた + CPU1人 + ダミー3 ／ 8バトル</small></button>
-      <button data-players="3"><strong>3人プレイ</strong><small>あなた + CPU2人 + ダミー2 ／ 10バトル</small></button>
-      <button data-players="4"><strong>4人プレイ</strong><small>あなた + CPU3人 ／ 12バトル</small></button>
-      <button data-players="5"><strong>5人プレイ</strong><small>あなた + CPU4人 ／ 14バトル</small></button>
-    </div>
 
-    <!-- ===== Online play ===== -->
-    <div class="online-cta" id="online-cta">
-      <h3>みんなでオンライン対戦</h3>
-      <p class="muted" style="font-size:12px; margin:0 0 10px;">
-        部屋コードを共有して、2人以上で対戦できます。CPUは入りません。
-      </p>
-      <div class="online-form">
-        <div class="online-buttons">
-          <button id="mp-create-btn">部屋を作る</button>
-          <span class="online-or">／</span>
-          <input type="text" id="mp-code" maxlength="4" placeholder="ABCD" autocapitalize="characters">
-          <button id="mp-join-btn">参加</button>
+    <details class="cta-card" id="solo-cta">
+      <summary>
+        <span class="cta-icon">🌱</span>
+        <span class="cta-body">
+          <strong>ひとりで遊ぶ</strong>
+          <small>CPUと気軽に対戦</small>
+        </span>
+        <span class="cta-chev" aria-hidden="true">▾</span>
+      </summary>
+      <div class="cta-expanded">
+        <p class="muted" style="font-size:12px; margin:0 0 12px;">
+          あなたは<strong>プレイヤー1</strong>。残りはCPUとダミー山札（ルール準拠で常に5デッキ）。
+          各CPUはゲームごとに違う性格（点数狙い／色集め／コスパ重視／攻撃的／バランス）を持ちます。
+        </p>
+        <div class="player-options">
+          <button data-players="2"><strong>2人プレイ</strong><small>あなた + CPU1人 + ダミー3 ／ 8バトル</small></button>
+          <button data-players="3"><strong>3人プレイ</strong><small>あなた + CPU2人 + ダミー2 ／ 10バトル</small></button>
+          <button data-players="4"><strong>4人プレイ</strong><small>あなた + CPU3人 ／ 12バトル</small></button>
+          <button data-players="5"><strong>5人プレイ</strong><small>あなた + CPU4人 ／ 14バトル</small></button>
         </div>
-        <div id="mp-status-line" class="online-status"></div>
       </div>
-    </div>
+    </details>
+
+    <details class="cta-card" id="online-cta">
+      <summary>
+        <span class="cta-icon">🌸</span>
+        <span class="cta-body">
+          <strong>みんなで遊ぶ</strong>
+          <small>部屋コードを共有してオンライン対戦</small>
+        </span>
+        <span class="cta-chev" aria-hidden="true">▾</span>
+      </summary>
+      <div class="cta-expanded">
+        <p class="muted" style="font-size:12px; margin:0 0 10px;">
+          部屋コードを共有して、2人以上で対戦できます。CPUは入りません。
+        </p>
+        <div class="online-form">
+          <div class="online-buttons">
+            <button id="mp-create-btn">部屋を作る</button>
+            <span class="online-or">／</span>
+            <input type="text" id="mp-code" maxlength="4" placeholder="ABCD" autocapitalize="characters">
+            <button id="mp-join-btn">参加</button>
+          </div>
+          <div id="mp-status-line" class="online-status"></div>
+        </div>
+      </div>
+    </details>
 
     <!-- ===== Lobby (visible while in a room, before game starts) ===== -->
     <div class="lobby-panel hidden" id="lobby-panel">
@@ -80,47 +106,55 @@
       <div id="lobby-error" class="lobby-error"></div>
     </div>
 
-    <div class="manual-cta">
-      <button id="manual-btn-setup">📖 ルールブックを開く</button>
-      <p class="muted" style="font-size:12px; margin:8px 0 0;">初めての方はゲーム開始前にひととおり目を通すと安心です。</p>
-    </div>
+    <button class="cta-card cta-flat" id="manual-btn-setup" type="button">
+      <span class="cta-icon">📖</span>
+      <span class="cta-body">
+        <strong>ルールを読む</strong>
+        <small>初めての方はゲーム開始前にひととおりどうぞ</small>
+      </span>
+    </button>
 
-    <div class="optin-cta">
-      <label class="optin-row">
-        <input type="checkbox" id="log-optin-toggle">
-        <span><strong>プレイデータの送信に協力する</strong></span>
-      </label>
-      <p class="muted" style="font-size:11px; margin:6px 0 0;">
-        ゲームバランス調整のため、各バトルの進行（出されたカードや勝者など）を匿名で集計しています。<br>
-        端末ごとに自動生成される匿名IDのみを使用、個人情報は一切送信しません。チェックを外せば送信を停止します。
-      </p>
-    </div>
+    <details class="advanced-section">
+      <summary>詳細設定 ／ プレイデータ ／ シミュレータ</summary>
+      <div class="advanced-body">
+        <div class="optin-cta">
+          <label class="optin-row">
+            <input type="checkbox" id="log-optin-toggle">
+            <span><strong>プレイデータの送信に協力する</strong></span>
+          </label>
+          <p class="muted" style="font-size:11px; margin:6px 0 0;">
+            ゲームバランス調整のため、各バトルの進行（出されたカードや勝者など）を匿名で集計しています。<br>
+            端末ごとに自動生成される匿名IDのみを使用、個人情報は一切送信しません。チェックを外せば送信を停止します。
+          </p>
+        </div>
 
-    <div class="sim-cta hidden" id="sim-cta">
-      <h3>テストプレイ（無音シミュレーション）</h3>
-      <p>CPU同士でゲームを多数回まわし、性格別勝率や平均バトル数などを集計します。<br>ルール調整の参考にお使いください。</p>
-      <div class="sim-options">
-        <label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;">
-          人数
-          <select id="sim-players">
-            <option value="2">2人</option>
-            <option value="3">3人</option>
-            <option value="4" selected>4人</option>
-            <option value="5">5人</option>
-          </select>
-        </label>
-        <label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;">
-          回数
-          <select id="sim-count">
-            <option value="50">50</option>
-            <option value="100" selected>100</option>
-            <option value="200">200</option>
-            <option value="500">500</option>
-          </select>
-        </label>
-        <button id="sim-run-btn">▶ シミュレーション実行</button>
+        <div class="sim-cta hidden" id="sim-cta">
+          <h3>テストプレイ（無音シミュレーション）</h3>
+          <p>CPU同士でゲームを多数回まわし、性格別勝率や平均バトル数などを集計します。<br>ルール調整の参考にお使いください。</p>
+          <div class="sim-options">
+            <label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;">
+              人数
+              <select id="sim-players">
+                <option value="2">2人</option>
+                <option value="3">3人</option>
+                <option value="4" selected>4人</option>
+                <option value="5">5人</option>
+              </select>
+            </label>
+            <label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;">
+              回数
+              <select id="sim-count">
+                <option value="50">50</option>
+                <option value="100" selected>100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+              </select>
+            </label>
+            <button id="sim-run-btn">▶ シミュレーション実行</button>
+          </div>
+        </div>
       </div>
-    </div>
+    </details>
   </section>
 
   <!-- Game screen -->
