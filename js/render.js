@@ -99,7 +99,7 @@ function renderPlayers() {
       if (pp.lockDumpBias) params.push(`乗り後捨て: ${fmt(pp.lockDumpBias)}`);
       if (rm) {
         params.push(`―― ${RESOURCE_MODE_DESC[rm.type]}`);
-        params.push(`残量警戒: ${fmt(rm.worryThreshold)}枚/バトル`);
+        params.push(`残量警戒: ${fmt(rm.worryThreshold)}枚/ラウンド`);
         params.push(`圧縮下限: ${fmt(rm.pressureFloor)}`);
       }
       const bst = p.biddingStyle;
@@ -185,7 +185,7 @@ function renderDummies() {
 }
 
 function renderGoal() {
-  $('round-info').textContent = `Battle ${state.currentRound} / ${state.maxRounds}`;
+  $('round-info').textContent = `Round ${state.currentRound} / ${state.maxRounds}`;
   const div = $('goal-card-display');
   if (!state.goalCard) {
     div.classList.remove('has-img');
@@ -516,8 +516,8 @@ function renderPhase() {
       setTurnBanner('', null);
     }
   } else if (state.phase === 'battleEnd') {
-    txt.innerHTML = `<strong>バトル終了</strong> ／ 次バトル準備中…`;
-    setTurnBanner('バトル終了 — 次バトル準備中…', 'waiting');
+    txt.innerHTML = `<strong>ラウンド終了</strong> ／ 次ラウンド準備中…`;
+    setTurnBanner('ラウンド終了 — 次ラウンド準備中…', 'waiting');
   } else {
     setTurnBanner('', null);
   }

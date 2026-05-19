@@ -88,7 +88,7 @@ function startNewBattle() {
     }
   }
 
-  log(`━━ Battle ${state.currentRound} 開始 ／ 親: ${state.players[state.parentIdx].name} ／ 目的: ${formatCard(state.goalCard)} (${SUIT_LABELS[state.goalCard.suit]}) ━━`, 'section');
+  log(`━━ Round ${state.currentRound} 開始 ／ 親: ${state.players[state.parentIdx].name} ／ 目的: ${formatCard(state.goalCard)} (${SUIT_LABELS[state.goalCard.suit]}) ━━`, 'section');
   if (typeof logEvent === 'function') {
     logEvent('battle_start', {
       round: state.currentRound,
@@ -427,7 +427,7 @@ function endBattle(winnerId, reason) {
     }
     state.phase = 'gameOver';
     state.winnerId = best.id;
-    log(`規定 ${state.maxRounds} バトル終了。${best.name} が ${bestScore} 点で勝利`, 'win');
+    log(`規定 ${state.maxRounds} ラウンド終了。${best.name} が ${bestScore} 点で勝利`, 'win');
     if (typeof logGameEnd === 'function') {
       logGameEnd({
         num_battles: state.currentRound,

@@ -139,7 +139,7 @@ function runSimulation(numPlayers, numGames, onProgress) {
 
 function renderSimResult(stats) {
   const totalGames = stats.completed;
-  const meta = `${stats.numPlayers}人プレイ × ${totalGames}回 ／ 平均 ${stats.avgBattles.toFixed(2)} バトルで決着 ／ 即勝 ${stats.instantWins}（${(stats.instantWins/totalGames*100).toFixed(1)}%）／ 点数勝ち ${stats.pointWins}`;
+  const meta = `${stats.numPlayers}人プレイ × ${totalGames}回 ／ 平均 ${stats.avgBattles.toFixed(2)} ラウンドで決着 ／ 即勝 ${stats.instantWins}（${(stats.instantWins/totalGames*100).toFixed(1)}%）／ 点数勝ち ${stats.pointWins}`;
   $('sim-meta').textContent = meta;
 
   // Per personality table
@@ -264,8 +264,8 @@ function renderSimResult(stats) {
     <div class="sim-section">
       <h3>ゲーム決着内訳</h3>
       即勝（同スート3 or 異4種）: <strong>${stats.instantWins}</strong> / ${totalGames}（${(stats.instantWins/totalGames*100).toFixed(1)}%）<br>
-      点数勝ち（規定バトル消化）: <strong>${stats.pointWins}</strong> / ${totalGames}（${(stats.pointWins/totalGames*100).toFixed(1)}%）<br>
-      平均バトル数: <strong>${stats.avgBattles.toFixed(2)}</strong>
+      点数勝ち（規定ラウンド消化）: <strong>${stats.pointWins}</strong> / ${totalGames}（${(stats.pointWins/totalGames*100).toFixed(1)}%）<br>
+      平均ラウンド数: <strong>${stats.avgBattles.toFixed(2)}</strong>
     </div>
     <div class="sim-section">
       <h3>得点札別 勝利貢献度（点数勝ち時）</h3>
@@ -313,7 +313,7 @@ function renderSimResult(stats) {
       </p>
     </div>
     <div class="sim-section">
-      <h3>バトル決着内訳</h3>
+      <h3>ラウンド決着内訳</h3>
       ${(() => {
         const r = stats.battleEndReasons;
         const total = r.scoreOut + r.lastStanding + r.allDropped;
@@ -322,7 +322,7 @@ function renderSimResult(stats) {
         return `${WIN_THRESHOLD}点到達で決着: <strong>${pct(r.scoreOut)}</strong><br>
                 他全員が降りて勝者確定: <strong>${pct(r.lastStanding)}</strong><br>
                 全員降りて勝者なし: <strong>${pct(r.allDropped)}</strong><br>
-                バトル総数: <strong>${total}</strong>`;
+                ラウンド総数: <strong>${total}</strong>`;
       })()}
     </div>`;
   $('sim-content').innerHTML = html;
