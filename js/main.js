@@ -163,5 +163,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Show tab nav (it's hidden by default to avoid FOUC; CSS handles desktop hide)
   $('tab-nav').classList.remove('hidden');
 
+  // Play history (localStorage)
+  if (typeof renderHistoryList === 'function') renderHistoryList();
+  const histClearBtn = document.getElementById('history-clear-btn');
+  if (histClearBtn) {
+    histClearBtn.addEventListener('click', () => {
+      if (!confirm('プレイ履歴を消去します。よろしいですか？')) return;
+      clearPlayHistory();
+      renderHistoryList();
+    });
+  }
+
   render();
 });

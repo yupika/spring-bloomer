@@ -271,31 +271,108 @@ details.cta-card[open] .cta-chev { transform: rotate(180deg); }
   margin-top: -1px;
 }
 
-/* Advanced (folded) section */
-.advanced-section {
-  margin-top: 18px;
+/* ===== Play history (on setup screen) ===== */
+.history-section {
+  margin-top: 22px;
+  padding: 14px 16px 10px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
 }
-.advanced-section > summary {
-  font-size: 12px;
-  color: var(--ink-soft);
-  cursor: pointer;
-  padding: 8px 4px;
-  user-select: none;
-  list-style: none;
+.history-section h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  color: var(--green-deep);
+  margin: 0 0 8px;
   letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-bottom: 1px dotted var(--rule);
+  padding-bottom: 4px;
 }
-.advanced-section > summary::-webkit-details-marker { display: none; }
-.advanced-section > summary::before {
-  content: '▸ ';
-  display: inline-block;
-  transition: transform 0.2s;
+.history-list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
 }
-.advanced-section[open] > summary::before {
-  transform: rotate(90deg);
+.hist-item {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 4px;
+  border-bottom: 1px dotted rgba(184,168,122,0.5);
+  font-size: 12px;
+  color: var(--ink);
 }
-.advanced-section > summary:hover { color: var(--green-deep); }
-.advanced-body {
-  padding: 6px 0 0;
+.hist-item:last-child { border-bottom: none; }
+.hist-meta {
+  color: var(--ink-soft);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+}
+.hist-rank {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-soft);
+  min-width: 26px;
+  text-align: center;
+}
+.hist-rank.won { color: var(--suit-a); }
+.hist-rank.second { color: var(--green-deep); }
+.hist-name {
+  font-weight: 600;
+  color: var(--green-deep);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hist-suffix {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.hist-suffix.won {
+  color: var(--suit-a);
+  font-weight: 600;
+}
+.hist-win {
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+.hist-date {
+  font-size: 10px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.history-clear {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.history-clear:hover {
+  background: var(--paper-shade);
+  color: var(--green-deep);
+}
+@media (max-width: 600px) {
+  .hist-item {
+    grid-template-columns: auto auto 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 2px;
+  }
+  .hist-meta { grid-column: 1 / -1; }
+  .hist-win, .hist-date {
+    grid-column: 1 / -1;
+    text-align: right;
+  }
 }
 
 /* Game Screen */
@@ -1001,6 +1078,66 @@ details.cta-card[open] .cta-chev { transform: rotate(180deg); }
   letter-spacing: 0.05em;
 }
 #result button:hover { background: var(--green-leaf); }
+
+/* Game-end promo (Game Market 2026 spring) */
+.result-promo {
+  margin: 0 auto 24px;
+  padding: 16px 20px 18px;
+  max-width: 460px;
+  background: var(--paper);
+  border: 1px dashed var(--green-deep);
+  text-align: left;
+  position: relative;
+}
+.result-promo-tag {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--green-deep);
+  background: var(--paper-shade);
+  padding: 2px 8px;
+  border: 1px solid var(--rule);
+  margin-bottom: 8px;
+}
+.result-promo-title {
+  margin: 4px 0 6px;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--ink);
+}
+.result-promo-meta {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.result-promo-meta strong {
+  color: var(--green-deep);
+  font-family: 'Cormorant Garamond', serif;
+  letter-spacing: 0.05em;
+}
+.result-promo-body {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.result-promo-cta {
+  display: inline-block;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--paper);
+  background: var(--green-deep);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: background 0.15s;
+}
+.result-promo-cta:hover { background: var(--green-leaf); }
+@media (max-width: 600px) {
+  .result-promo { padding: 14px; }
+  .result-promo-title { font-size: 15px; }
+}
 
 /* Tab navigation (mobile) */
 .tab-nav {

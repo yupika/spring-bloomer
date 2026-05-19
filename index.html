@@ -31,7 +31,6 @@
   <section id="setup">
     <div class="hero">
       <img class="hero-art" src="assets/logo/springbloomer.png" alt="Spring Bloomer">
-      <img class="hero-wordmark" src="assets/logo/springbloomer02.png" alt="Spring Bloomer / スプリングブルーマー">
       <p class="hero-tagline">野の花たちが繰り広げる、<br>せりと駆け引きの花束づくり。</p>
     </div>
 
@@ -50,10 +49,6 @@
         <span class="cta-chev" aria-hidden="true">▾</span>
       </summary>
       <div class="cta-expanded">
-        <p class="muted" style="font-size:12px; margin:0 0 12px;">
-          あなたは<strong>プレイヤー1</strong>。残りはCPUとダミー山札（ルール準拠で常に5デッキ）。
-          各CPUはゲームごとに違う性格（点数狙い／色集め／コスパ重視／攻撃的／バランス）を持ちます。
-        </p>
         <div class="player-options">
           <button data-players="2"><strong>2人プレイ</strong><small>あなた + CPU1人 + ダミー3 ／ 8バトル</small></button>
           <button data-players="3"><strong>3人プレイ</strong><small>あなた + CPU2人 + ダミー2 ／ 10バトル</small></button>
@@ -114,47 +109,48 @@
       </span>
     </button>
 
-    <details class="advanced-section">
-      <summary>詳細設定 ／ プレイデータ ／ シミュレータ</summary>
-      <div class="advanced-body">
-        <div class="optin-cta">
-          <label class="optin-row">
-            <input type="checkbox" id="log-optin-toggle">
-            <span><strong>プレイデータの送信に協力する</strong></span>
-          </label>
-          <p class="muted" style="font-size:11px; margin:6px 0 0;">
-            ゲームバランス調整のため、各バトルの進行（出されたカードや勝者など）を匿名で集計しています。<br>
-            端末ごとに自動生成される匿名IDのみを使用、個人情報は一切送信しません。チェックを外せば送信を停止します。
-          </p>
-        </div>
+    <div class="history-section hidden" id="history-section">
+      <h3>これまでの記録（この端末のみ）</h3>
+      <ul class="history-list" id="history-list"></ul>
+      <button id="history-clear-btn" class="history-clear" type="button">履歴を消す</button>
+    </div>
 
-        <div class="sim-cta hidden" id="sim-cta">
-          <h3>テストプレイ（無音シミュレーション）</h3>
-          <p>CPU同士でゲームを多数回まわし、性格別勝率や平均バトル数などを集計します。<br>ルール調整の参考にお使いください。</p>
-          <div class="sim-options">
-            <label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;">
-              人数
-              <select id="sim-players">
-                <option value="2">2人</option>
-                <option value="3">3人</option>
-                <option value="4" selected>4人</option>
-                <option value="5">5人</option>
-              </select>
-            </label>
-            <label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;">
-              回数
-              <select id="sim-count">
-                <option value="50">50</option>
-                <option value="100" selected>100</option>
-                <option value="200">200</option>
-                <option value="500">500</option>
-              </select>
-            </label>
-            <button id="sim-run-btn">▶ シミュレーション実行</button>
-          </div>
-        </div>
+    <div class="optin-cta">
+      <label class="optin-row">
+        <input type="checkbox" id="log-optin-toggle">
+        <span><strong>プレイデータの送信に協力する</strong></span>
+      </label>
+      <p class="muted" style="font-size:11px; margin:6px 0 0;">
+        ゲームバランス調整のため、各バトルの進行（出されたカードや勝者など）を匿名で集計しています。<br>
+        端末ごとに自動生成される匿名IDのみを使用、個人情報は一切送信しません。チェックを外せば送信を停止します。
+      </p>
+    </div>
+
+    <div class="sim-cta hidden" id="sim-cta">
+      <h3>テストプレイ（無音シミュレーション）</h3>
+      <p>CPU同士でゲームを多数回まわし、性格別勝率や平均バトル数などを集計します。<br>ルール調整の参考にお使いください。</p>
+      <div class="sim-options">
+        <label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;">
+          人数
+          <select id="sim-players">
+            <option value="2">2人</option>
+            <option value="3">3人</option>
+            <option value="4" selected>4人</option>
+            <option value="5">5人</option>
+          </select>
+        </label>
+        <label style="font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:6px;">
+          回数
+          <select id="sim-count">
+            <option value="50">50</option>
+            <option value="100" selected>100</option>
+            <option value="200">200</option>
+            <option value="500">500</option>
+          </select>
+        </label>
+        <button id="sim-run-btn">▶ シミュレーション実行</button>
       </div>
-    </details>
+    </div>
   </section>
 
   <!-- Game screen -->
@@ -235,10 +231,10 @@
       <div class="panel" data-tab="rules">
         <h3>無色カード早見</h3>
         <div class="wild-key">
-          <div class="wild-key-row"><span class="wild-key-tag">0[=R]</span><span>現在のラウンド数になる</span></div>
-          <div class="wild-key-row"><span class="wild-key-tag">1[+引]</span><span>素点1、出した後デッキから1枚引く</span></div>
-          <div class="wild-key-row"><span class="wild-key-tag">6</span><span>素点6（効果なし）</span></div>
-          <div class="wild-note">※ 無色は同スートボーナス対象外。<br>場の数え方も無色は加算されません。</div>
+          <div class="wild-key-row"><span class="wild-key-tag">✣[=R]</span><span>値が現在のバトル数になる（テントウムシ）</span></div>
+          <div class="wild-key-row"><span class="wild-key-tag">✣[+引]</span><span>値1、出した後デッキから1枚引く（ラッパ）</span></div>
+          <div class="wild-key-row"><span class="wild-key-tag">✣6</span><span>値6（効果なし／蝶々）</span></div>
+          <div class="wild-note">※ ワイルド札はスコア計算の同スート枚数に数えず、自身もボーナスを受けません。</div>
         </div>
       </div>
 
@@ -253,6 +249,15 @@
   <section id="result" class="hidden">
     <h2 id="result-title">🌸</h2>
     <div id="result-detail"></div>
+
+    <aside class="result-promo" aria-label="ゲームマーケット2026春 告知">
+      <div class="result-promo-tag">📦 物理版のおしらせ</div>
+      <p class="result-promo-title">ボードゲーム版『野の花の庭』<br>ゲームマーケット2026春で発売！</p>
+      <p class="result-promo-meta">2026/5/23(土) ／ ブース <strong>T-51</strong></p>
+      <p class="result-promo-body">ご予約いただけると確実に手に入ります。会場でのお取り置きにも対応します。</p>
+      <a class="result-promo-cta" href="https://docs.google.com/forms/d/e/1FAIpQLSdHPygdb4X6DuYZisJFnD4IrNXYcp3KU1lB2f5KvmgCeVDodQ/viewform?usp=header" target="_blank" rel="noopener noreferrer">▶ 予約フォームを開く</a>
+    </aside>
+
     <button id="play-again-btn">もう一度プレイ</button>
   </section>
 
@@ -290,8 +295,8 @@
           <li><a href="#m-purpose">ゲームの目的</a></li>
           <li><a href="#m-flow">ゲームの流れ</a></li>
           <li><a href="#m-battle">バトルの進行</a></li>
-          <li><a href="#m-controls">操作方法（重要）</a></li>
-          <li><a href="#m-score">得点の計算</a></li>
+          <li><a href="#m-controls">操作方法</a></li>
+          <li><a href="#m-score">スコアの計算</a></li>
           <li><a href="#m-cards">カードの内訳</a></li>
           <li><a href="#m-win">勝利条件</a></li>
           <li><a href="#m-misc">細かいルール</a></li>
@@ -300,12 +305,13 @@
 
       <section id="m-purpose" class="manual-sec">
         <h3>1. ゲームの目的</h3>
-        <p>毎バトルめくられる<strong>得点札</strong>を取り合うせりゲームです。集めた得点札の組み合わせ、または最終的な合計点で勝者を決めます。</p>
+        <p>毎バトルめくられる<strong>得点札</strong>を取り合うせりゲームです。獲得した得点札の組み合わせ、または最終的な得点の合計で勝者を決めます。</p>
         <ul>
-          <li>同スートの得点札を <strong>3枚</strong> 揃えると即勝利</li>
-          <li>異なるスートを <strong>4種</strong> 揃えると即勝利</li>
-          <li>規定バトル数を消化したら、得点札の<strong>合計点が最多</strong>の人が勝利</li>
+          <li>同スートの得点札を <strong>3枚</strong> 集めると即勝利</li>
+          <li>異なるスートを <strong>4種</strong> 集めると即勝利</li>
+          <li>規定バトル数を消化した時点で、獲得した得点札の<strong>合計値が最多</strong>の人が勝利</li>
         </ul>
+        <p class="manual-note">※「<strong>スコア</strong>」と「<strong>得点</strong>」は別物です。スコアはスコアボード上のコマの位置（0〜33）、得点は獲得した得点札に書かれている数字のこと。スコアはバトル中の手番順を決めるためだけに使い、バトルが終わるとリセットされます。</p>
       </section>
 
       <section id="m-flow" class="manual-sec">
@@ -350,14 +356,14 @@
 
         <h4>3-4. バトル終了</h4>
         <ul>
-          <li>1人を残して全員が降りる → 残ったプレイヤーが勝者</li>
-          <li>スコアが <strong>33点</strong> に到達 → 到達者が勝者</li>
-          <li>勝者が得点札を獲得、次バトルへ</li>
+          <li>1人を残して全員が降りる → 残ったプレイヤーがバトル勝者</li>
+          <li>スコアが <strong>33（ゴールマス）</strong> に到達 → 到達者がバトル勝者</li>
+          <li>バトル勝者は<strong>得点札</strong>を獲得し、次バトルの親になる</li>
         </ul>
       </section>
 
       <section id="m-controls" class="manual-sec">
-        <h3>4. 操作方法（重要）</h3>
+        <h3>4. 操作方法</h3>
         <table class="manual-table">
           <thead><tr><th>ボタン</th><th>使えるタイミング</th><th>意味</th></tr></thead>
           <tbody>
@@ -369,21 +375,44 @@
       </section>
 
       <section id="m-score" class="manual-sec">
-        <h3>5. 得点の計算</h3>
-        <p>カード1枚を出したときのスコアは：</p>
-        <pre class="manual-formula">スコア = カードの値
-       + 場の同スートカードの数（自分のカードは除外）
-       + 得点札のスートと一致なら +1</pre>
-        <p>同時出しでも入札中でも、<strong>自分が今出したカードのスートは加算対象外</strong>です。</p>
+        <h3>5. スコアの計算</h3>
+        <p>スコアはカード1枚を出すたびに計算し、その値ぶんスコアボード上のコマを前に進めます（バトル勝利を競う数値であり、ゲーム全体の<strong>得点</strong>とは別物）。</p>
+        <pre class="manual-formula">スコア = ① 出したカードの数字
+       + ② 場に出ている同スートのカード枚数</pre>
 
-        <h4>例</h4>
+        <p>② に<strong>含めるもの</strong>：</p>
+        <ul>
+          <li>このバトルの<strong>得点札</strong>（同スートのとき）</li>
+          <li>他プレイヤーが同時出しで公開したカード</li>
+          <li>ダミー山からめくられたカード（2人 / 3人プレイ時）</li>
+          <li>自分がこのバトルで<strong>既に出した</strong>カード（同時出しの1枚＋過去の手番で出した分）</li>
+        </ul>
+        <p>② に<strong>含めないもの</strong>：</p>
+        <ul>
+          <li>いま計算している、その1枚そのもの</li>
+          <li>ワイルド札（無色の ✣）</li>
+        </ul>
+
+        <h4>例（同時出し時）</h4>
         <div class="manual-example">
-          <p>得点札：5 ✿ ネジハナ ／ 場：✿2枚、❀1枚<br>
-          出すカード：✿ ネジハナ の <strong>3</strong></p>
-          <p>スコア＝ <strong>3</strong>（カード値）＋ <strong>2</strong>（場の✿2枚）＋ <strong>1</strong>（得点札と同スート）＝ <strong>6</strong></p>
+          <p>得点札：✿ ネジハナの <strong>5</strong><br>
+          場（同時出し）：あなたの ✿3、Bさんの ✿1、Cさんの ❀6、Dさんの ✿2</p>
+          <p>あなたの「✿3」のスコア<br>
+          ＝ <strong>3</strong>（数字）＋ <strong>3</strong>（場の✿：得点札＋B＋D。自分の1枚は除く）<br>
+          ＝ <strong>6</strong></p>
         </div>
 
-        <p class="manual-note">※ ワイルド札は同スートカウントの対象外、得点札ボーナスも対象外です。</p>
+        <h4>例（入札時／同じ手番で続けて出した場合）</h4>
+        <div class="manual-example">
+          <p>得点札：✾ スミレの <strong>5</strong><br>
+          既出：得点札 ✾5、Bの ✾1、Dの ✾4、Cの ❀（無関係）、自分の同時出し ✾2</p>
+          <p>手番で手札から <strong>✾3</strong> を出した<br>
+          ＝ 3 ＋ 4（得点札＋B＋D＋自分の同時出し）= <strong>7</strong></p>
+          <p>続けて同じ手番で <strong>✾1</strong> を出した<br>
+          ＝ 1 ＋ 5（上記の4枚＋直前に出した自分の ✾3）= <strong>6</strong></p>
+        </div>
+
+        <p class="manual-note">※ ワイルド札（✣）を出したときのスコアは<strong>カード面の値そのまま</strong>。同スート枚数のボーナスも、得点札との同スート加算も受けません。場に出ているワイルド札も、他カードの「同スート枚数」には数えません。</p>
       </section>
 
       <section id="m-cards" class="manual-sec">
@@ -402,16 +431,16 @@
           </tbody>
         </table>
 
-        <h4>6-2. ワイルド札（5枚 / 全プレイヤー共通）</h4>
+        <h4>6-2. ワイルド札（5枚 / デッキ内に共通で含まれる）</h4>
         <table class="manual-table">
-          <thead><tr><th>表記</th><th>枚数</th><th>効果</th></tr></thead>
+          <thead><tr><th>名称</th><th>表記</th><th>枚数</th><th>効果</th></tr></thead>
           <tbody>
-            <tr><td>0 ✣ [=R]</td><td>1</td><td>その瞬間の値が現在のラウンド数になる</td></tr>
-            <tr><td>1 ✣ [+引]</td><td>3</td><td>値1。出した後にデッキから1枚引く</td></tr>
-            <tr><td>6 ✣</td><td>1</td><td>値6。効果なし</td></tr>
+            <tr><td>テントウムシ</td><td>✣ [=R]</td><td>1</td><td>出した値が<strong>現在のバトル数</strong>と同じになる</td></tr>
+            <tr><td>ラッパ</td><td>✣ [+引]</td><td>3</td><td>値1。出した後にデッキから1枚引く</td></tr>
+            <tr><td>蝶々</td><td>✣</td><td>1</td><td>値6。効果なし</td></tr>
           </tbody>
         </table>
-        <p class="manual-note">※ ワイルドは同スートボーナス・得点札ボーナスとも対象外。</p>
+        <p class="manual-note">※ ワイルド札を出したときの値は<strong>カード面の値そのまま</strong>（テントウムシは現在のバトル数）で、同スート枚数のボーナスや得点札ボーナスを受けません。場のワイルド札も、他カードの「同スート枚数」には数えません。</p>
 
         <h4>6-3. 得点札（25枚 / 全ゲーム共通の1組）</h4>
         <p>各スート5枚ずつ。5を頂点とするピラミッド分布。</p>
@@ -490,6 +519,7 @@
 <script src="js/render.js"></script>
 <script src="js/multiplayer.js"></script>
 <script src="js/simulator.js"></script>
+<script src="js/history.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

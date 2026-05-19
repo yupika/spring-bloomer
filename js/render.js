@@ -545,6 +545,28 @@ function renderResult() {
     return `<div>${i + 1}. <strong>${p.name}</strong> ${p.goalCards.length}枚 ／ ${total}点 — ${cards || '—'}</div>`;
   }).join('');
   $('result-detail').innerHTML = `<span class="winner">${w.name}</span>${lines}`;
+
+  // Save to local play history (once per game)
+  if (!state.historySaved && typeof recordPlayHistory === 'function') {
+    const me = state.players[state.mySeat];
+    if (me) {
+      const myRank = sorted.findIndex(p => p.id === me.id) + 1;
+      const myScore = me.goalCards.reduce((s, c) => s + c.value, 0);
+      const winType = determineWinType(w.goalCards);
+      recordPlayHistory({
+        ts: Date.now(),
+        mode: state.mode || 'solo',
+        numPlayers: state.players.length,
+        myName: me.name,
+        myRank,
+        myScore,
+        winnerName: w.name,
+        winType,
+      });
+      if (typeof renderHistoryList === 'function') renderHistoryList();
+    }
+    state.historySaved = true;
+  }
 }
 
 // ============== Tabs (mobile) ==============

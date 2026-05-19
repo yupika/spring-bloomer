@@ -12,6 +12,7 @@ function startGame(numPlayers, humanName) {
   state.winnerId = null;
   state.battleEndCounts = { scoreOut: 0, lastStanding: 0, allDropped: 0 };
   state.revealedGoalCards = [];
+  state.historySaved = false;
 
   const resolvedHumanName = (humanName && humanName.trim()) || 'あなた';
 
