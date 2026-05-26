@@ -11,7 +11,9 @@ CREATE TABLE IF NOT EXISTS games (
   winner_seat   INTEGER,           -- 0-based seat index, NULL if no winner
   win_reason    TEXT,              -- 'instant' | 'points'
   winner_score  INTEGER,
-  log_json      TEXT,              -- full event log
+  mode          TEXT,              -- 'single' | 'multi'
+  my_seat       INTEGER,           -- local player's seat index (logger sender)
+  log_json      TEXT,              -- full event log (seats[] lives inside game_start event)
   ua            TEXT,              -- user agent (truncated)
   received_at   INTEGER NOT NULL DEFAULT (unixepoch() * 1000)  -- server clock
 );

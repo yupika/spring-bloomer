@@ -81,8 +81,8 @@ async function handleLog(request, env, origin) {
       INSERT INTO games (
         uid, app_version, num_players, num_battles,
         started_at, ended_at, winner_seat, win_reason, winner_score,
-        log_json, ua
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        mode, my_seat, log_json, ua
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       body.uid,
       body.app_version || null,
@@ -93,6 +93,8 @@ async function handleLog(request, env, origin) {
       body.winner_seat ?? null,
       body.win_reason || null,
       body.winner_score ?? null,
+      body.mode || null,
+      body.my_seat ?? null,
       raw,
       ua,
     ).run();
@@ -116,6 +118,12 @@ function validate(b) {
   }
   if (b.events && b.events.length > 5000) {
     return { error: 'too many events' };
+  }
+  if (b.mode != null && b.mode !== 'single' && b.mode !== 'multi') {
+    return { error: 'mode must be single or multi' };
+  }
+  if (b.my_seat != null && (typeof b.my_seat !== 'number' || b.my_seat < 0 || b.my_seat > 15)) {
+    return { error: 'my_seat out of range' };
   }
   return {};
 }

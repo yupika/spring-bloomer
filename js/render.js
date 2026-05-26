@@ -24,7 +24,6 @@ function render() {
   if (state.phase === 'gameOver') { renderResult(); return; }
 
   renderPlayers();
-  renderDummies();
   renderGoal();
   renderBoard();
   renderSuitTally();
@@ -99,7 +98,7 @@ function renderPlayers() {
       if (pp.lockDumpBias) params.push(`乗り後捨て: ${fmt(pp.lockDumpBias)}`);
       if (rm) {
         params.push(`―― ${RESOURCE_MODE_DESC[rm.type]}`);
-        params.push(`残量警戒: ${fmt(rm.worryThreshold)}枚/バトル`);
+        params.push(`残量警戒: ${fmt(rm.worryThreshold)}枚/ラウンド`);
         params.push(`圧縮下限: ${fmt(rm.pressureFloor)}`);
       }
       const bst = p.biddingStyle;
@@ -132,60 +131,8 @@ function renderPlayers() {
   }
 }
 
-function renderDummies() {
-  const ul = $('dummy-list');
-  if (state.dummies.length === 0) {
-    ul.innerHTML = '<li style="font-size: 12px; color: var(--ink-soft); font-style: italic;">なし（4-5人プレイ）</li>';
-    return;
-  }
-  // Track per-dummy reveal state so we only re-render (and flip-animate) on change.
-  const flipped = new Set();
-  for (const d of state.dummies) {
-    const cardKey = d.revealed ? `${d.revealed.suit}${d.revealed.value}${d.revealed.effect || ''}` : '';
-    let li = ul.querySelector(`[data-dummy-id="${d.id}"]`);
-    const prevKey = li ? li.dataset.cardKey || '' : '';
-    if (li && prevKey === cardKey) {
-      // Just refresh deck count
-      const deckSpan = li.querySelector('.dummy-deck');
-      if (deckSpan) deckSpan.textContent = `山${d.deck.length}`;
-      continue;
-    }
-    if (!li) {
-      li = document.createElement('li');
-      li.className = 'dummy-item';
-      li.dataset.dummyId = d.id;
-      ul.appendChild(li);
-    }
-    li.dataset.cardKey = cardKey;
-    let cardHTML;
-    if (d.revealed) {
-      cardHTML = `
-        <div class="card card-img-wrap small">
-          <div class="flip-card${prevKey === '' ? ' flipped' : ''}">
-            <div class="flip-face flip-back"><img class="card-img" src="assets/cards/hand/back.webp" alt="裏"></div>
-            <div class="flip-face flip-front"><img class="card-img" src="${cardImagePath(d.revealed, 'hand')}" alt="${d.revealed.value}"></div>
-          </div>
-        </div>
-      `;
-      if (prevKey === '') flipped.add(li);
-    } else {
-      cardHTML = cardBackHTML('small');
-    }
-    li.innerHTML = `<span class="label">${d.id}</span>${cardHTML}<span class="dummy-deck" style="font-size: 11px; color: var(--ink-soft); margin-left:auto;">山${d.deck.length}</span>`;
-  }
-  // Trigger flip animations on next frame for freshly-revealed cards.
-  if (flipped.size) {
-    requestAnimationFrame(() => {
-      for (const li of flipped) {
-        const fc = li.querySelector('.flip-card');
-        if (fc) fc.classList.remove('flipped');
-      }
-    });
-  }
-}
-
 function renderGoal() {
-  $('round-info').textContent = `Battle ${state.currentRound} / ${state.maxRounds}`;
+  $('round-info').textContent = `Round ${state.currentRound} / ${state.maxRounds}`;
   const div = $('goal-card-display');
   if (!state.goalCard) {
     div.classList.remove('has-img');
@@ -516,8 +463,8 @@ function renderPhase() {
       setTurnBanner('', null);
     }
   } else if (state.phase === 'battleEnd') {
-    txt.innerHTML = `<strong>バトル終了</strong> ／ 次バトル準備中…`;
-    setTurnBanner('バトル終了 — 次バトル準備中…', 'waiting');
+    txt.innerHTML = `<strong>ラウンド終了</strong> ／ 次ラウンド準備中…`;
+    setTurnBanner('ラウンド終了 — 次ラウンド準備中…', 'waiting');
   } else {
     setTurnBanner('', null);
   }
@@ -545,12 +492,34 @@ function renderResult() {
     return `<div>${i + 1}. <strong>${p.name}</strong> ${p.goalCards.length}枚 ／ ${total}点 — ${cards || '—'}</div>`;
   }).join('');
   $('result-detail').innerHTML = `<span class="winner">${w.name}</span>${lines}`;
+
+  // Save to local play history (once per game)
+  if (!state.historySaved && typeof recordPlayHistory === 'function') {
+    const me = state.players[state.mySeat];
+    if (me) {
+      const myRank = sorted.findIndex(p => p.id === me.id) + 1;
+      const myScore = me.goalCards.reduce((s, c) => s + c.value, 0);
+      const winType = determineWinType(w.goalCards);
+      recordPlayHistory({
+        ts: Date.now(),
+        mode: state.mode || 'solo',
+        numPlayers: state.players.length,
+        myName: me.name,
+        myRank,
+        myScore,
+        winnerName: w.name,
+        winType,
+      });
+      if (typeof renderHistoryList === 'function') renderHistoryList();
+    }
+    state.historySaved = true;
+  }
 }
 
 // ============== Tabs (mobile) ==============
 function setActiveTab(tab) {
   document.body.dataset.activeTab = tab;
   document.querySelectorAll('#tab-nav button').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === tab);
+    b.classList.toggle('active', b.dataset.go === tab);
   });
 }

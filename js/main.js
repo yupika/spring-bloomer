@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.mySeat = 0;
       const name = (nameInput?.value || '').trim() || 'あなた';
       startGame(parseInt(btn.dataset.players), name);
-      setActiveTab('battle');
+      setActiveTab('players');
     });
   });
   $('play-btn').addEventListener('click', () => {
@@ -123,9 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Tabs
-  setActiveTab('battle');
+  setActiveTab('players');
   document.querySelectorAll('#tab-nav button').forEach(b => {
-    b.addEventListener('click', () => setActiveTab(b.dataset.tab));
+    b.addEventListener('click', () => setActiveTab(b.dataset.go));
   });
 
   // Simulation
@@ -162,6 +162,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Show tab nav (it's hidden by default to avoid FOUC; CSS handles desktop hide)
   $('tab-nav').classList.remove('hidden');
+
+  // Play history (localStorage)
+  if (typeof renderHistoryList === 'function') renderHistoryList();
+  const histClearBtn = document.getElementById('history-clear-btn');
+  if (histClearBtn) {
+    histClearBtn.addEventListener('click', () => {
+      if (!confirm('プレイ履歴を消去します。よろしいですか？')) return;
+      clearPlayHistory();
+      renderHistoryList();
+    });
+  }
 
   render();
 });

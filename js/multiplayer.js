@@ -177,6 +177,7 @@ function onGameStarted(msg) {
   state.mySeat = self ? self.seat : 0;
   state.mode = 'multi';
   state.numPlayers = msg.numPlayers || mp.players.length;
+  state.historySaved = false;
   // Hide setup, show game
   $('setup').classList.add('hidden');
   $('result').classList.add('hidden');

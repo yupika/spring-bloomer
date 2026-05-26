@@ -100,7 +100,7 @@ const RESOURCE_MODE_LABELS = {
   hoarder: '保持',
 };
 const RESOURCE_MODE_DESC = {
-  burner:  '札を惜しまずバトルに出す。終盤に空っぽになりがち',
+  burner:  '札を惜しまずラウンドに出す。終盤に空っぽになりがち',
   flex:    '残量を見て自然にやりくり',
   hoarder: '札を温存。本命にだけ投入する',
 };
