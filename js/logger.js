@@ -9,7 +9,7 @@
 // (e.g. api-bloom.dilettantegames.net) once the DNS/route is wired.
 const API_ORIGIN = 'https://spring-bloomer-api.yupika-iris.workers.dev';
 
-const APP_VERSION = 'v0.2';
+const APP_VERSION = 'v0.3';
 const UID_KEY    = 'bloomer-uid';
 const OPTIN_KEY  = 'bloomer-log-optin';
 
@@ -52,8 +52,13 @@ let _meta   = null;
 function logGameStart(numPlayers, parentIdx) {
   if (!_shouldLog()) return;
   _buffer = [];
-  _meta = { started_at: Date.now(), num_players: numPlayers };
-  logEvent('game_start', { num_players: numPlayers, parent_idx: parentIdx });
+  const mode    = (typeof state !== 'undefined' && state.mode)    || 'single';
+  const mySeat  = (typeof state !== 'undefined' && state.mySeat != null) ? state.mySeat : 0;
+  const seats   = (typeof state !== 'undefined' && Array.isArray(state.players))
+    ? state.players.map(p => ({ id: p.id, name: p.name, is_human: !!p.isHuman }))
+    : [];
+  _meta = { started_at: Date.now(), num_players: numPlayers, mode, my_seat: mySeat };
+  logEvent('game_start', { num_players: numPlayers, parent_idx: parentIdx, mode, my_seat: mySeat, seats });
 }
 
 function logEvent(type, data) {
@@ -82,6 +87,8 @@ function logGameEnd(meta) {
     winner_seat:   meta.winner_seat,
     win_reason:    meta.win_reason,
     winner_score:  meta.winner_score,
+    mode:          _meta.mode,
+    my_seat:       _meta.my_seat,
     events:        _buffer,
   };
 
