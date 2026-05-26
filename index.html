@@ -19,13 +19,6 @@
   <span id="turn-banner-text"></span>
 </div>
 
-<nav id="tab-nav" class="tab-nav hidden">
-  <button data-tab="players">🌱 プレイヤー</button>
-  <button data-tab="battle" class="active">⚔ ラウンド</button>
-  <button data-tab="log">📜 ログ</button>
-  <button data-tab="rules">❀ ルール</button>
-</nav>
-
 <main id="app">
   <!-- Setup screen -->
   <section id="setup">
@@ -155,6 +148,14 @@
 
   <!-- Game screen -->
   <section id="game" class="hidden">
+    <!-- Mobile-only tab bar (shows below the always-visible play area) -->
+    <nav id="tab-nav" class="tab-nav hidden">
+      <button data-go="players" class="active">🌱 プレイヤー</button>
+      <button data-go="goals">🎴 獲得カード</button>
+      <button data-go="rules">❀ 勝利条件</button>
+      <button data-go="log">📜 ログ</button>
+    </nav>
+
     <!-- Left col -->
     <div class="left-col">
       <div class="panel" data-tab="players">
@@ -165,7 +166,7 @@
         <h3>ダミー山</h3>
         <ul id="dummy-list" class="dummy-list"></ul>
       </div>
-      <div class="panel" id="my-goals-panel" data-tab="players battle">
+      <div class="panel" id="my-goals-panel" data-tab="goals">
         <h3>あなたの獲得カード</h3>
         <div id="my-goals-row" class="goals-row"></div>
         <div id="my-suit-progress" class="suit-progress"></div>
@@ -176,8 +177,8 @@
       </div>
     </div>
 
-    <!-- Center: main playfield -->
-    <div class="center-col" data-tab="battle">
+    <!-- Center: main playfield (always visible) -->
+    <div class="center-col">
       <div class="goal-zone">
         <div class="goal-card-wrap">
           <div id="goal-card-display" class="goal-card"></div>

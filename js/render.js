@@ -573,6 +573,6 @@ function renderResult() {
 function setActiveTab(tab) {
   document.body.dataset.activeTab = tab;
   document.querySelectorAll('#tab-nav button').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === tab);
+    b.classList.toggle('active', b.dataset.go === tab);
   });
 }

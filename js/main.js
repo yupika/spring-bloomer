@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.mySeat = 0;
       const name = (nameInput?.value || '').trim() || 'あなた';
       startGame(parseInt(btn.dataset.players), name);
-      setActiveTab('battle');
+      setActiveTab('players');
     });
   });
   $('play-btn').addEventListener('click', () => {
@@ -123,9 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Tabs
-  setActiveTab('battle');
+  setActiveTab('players');
   document.querySelectorAll('#tab-nav button').forEach(b => {
-    b.addEventListener('click', () => setActiveTab(b.dataset.tab));
+    b.addEventListener('click', () => setActiveTab(b.dataset.go));
   });
 
   // Simulation

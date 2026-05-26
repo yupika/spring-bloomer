@@ -1380,19 +1380,25 @@ details.cta-card[open] .cta-chev { transform: rotate(180deg); }
   #game { grid-template-columns: 200px 1fr 240px; }
 }
 @media (max-width: 1024px) {
-  .tab-nav { display: flex; }
-  #game { grid-template-columns: 1fr; padding: 8px; gap: 8px; }
+  #game { grid-template-columns: minmax(0, 1fr); padding: 8px; gap: 8px; }
   #game .left-col, #game .right-col { display: contents; }
+  /* Play area (scoreboard / field / hand) stays on top and always visible.
+     The tab bar + exactly one info panel sit below it. */
+  .center-col { order: 1; min-width: 0; }
+  #tab-nav { display: flex; order: 2; position: static; }
+  #tab-nav button { font-size: 12px; padding: 11px 2px; letter-spacing: 0; min-width: 0; white-space: nowrap; }
+  #game .left-col > *, #game .right-col > * { order: 3; }
+  /* Switchable panels are marked with data-tab; nav buttons use data-go so
+     they are never caught by this gate (all four tabs stay tappable). */
   body[data-active-tab="players"] [data-tab]:not([data-tab~="players"]) { display: none !important; }
-  body[data-active-tab="battle"] [data-tab]:not([data-tab~="battle"]) { display: none !important; }
-  body[data-active-tab="log"] [data-tab]:not([data-tab~="log"]) { display: none !important; }
-  body[data-active-tab="rules"] [data-tab]:not([data-tab~="rules"]) { display: none !important; }
-  /* On battle tab, place the "your collected cards" panel after the play area */
-  body[data-active-tab="battle"] #my-goals-panel { order: 99; }
+  body[data-active-tab="goals"]   [data-tab]:not([data-tab~="goals"])   { display: none !important; }
+  body[data-active-tab="rules"]   [data-tab]:not([data-tab~="rules"])   { display: none !important; }
+  body[data-active-tab="log"]     [data-tab]:not([data-tab~="log"])     { display: none !important; }
   .card.hand-card { width: 48px; height: 70px; }
   .card.hand-card .v { font-size: 22px; }
   .card.hand-card .s { font-size: 16px; }
-  .board-grid { grid-template-columns: repeat(12, 1fr); }
+  .board-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1px; }
+  .board-grid .cell { min-height: 30px; }
   header { padding: 10px 14px 6px; }
   header h1 { font-size: 22px; }
   header h1 .jp { font-size: 18px; }
