@@ -456,23 +456,6 @@ details.cta-card[open] .cta-chev { transform: rotate(180deg); }
   border: 1px solid rgba(0,0,0,0.2);
 }
 
-.dummy-list { list-style: none; margin: 0; padding: 0; }
-.dummy-item {
-  padding: 6px 8px;
-  margin-bottom: 4px;
-  background: var(--paper);
-  border: 1px dashed var(--rule);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-}
-.dummy-item .label {
-  color: var(--ink-soft);
-  font-style: italic;
-  min-width: 50px;
-}
-
 /* Center area */
 .center-col { display: flex; flex-direction: column; gap: 10px; }
 .goal-zone {
@@ -1388,6 +1371,10 @@ details.cta-card[open] .cta-chev { transform: rotate(180deg); }
   #tab-nav { display: flex; order: 2; position: static; }
   #tab-nav button { font-size: 12px; padding: 11px 2px; letter-spacing: 0; min-width: 0; white-space: nowrap; }
   #game .left-col > *, #game .right-col > * { order: 3; }
+  /* Stack the phase prompt above full-width action buttons (no char-by-char wrap) */
+  .phase-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .phase-bar .actions { justify-content: stretch; }
+  .phase-bar .actions button { flex: 1; padding: 10px 6px; }
   /* Switchable panels are marked with data-tab; nav buttons use data-go so
      they are never caught by this gate (all four tabs stay tappable). */
   body[data-active-tab="players"] [data-tab]:not([data-tab~="players"]) { display: none !important; }

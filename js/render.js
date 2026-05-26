@@ -24,7 +24,6 @@ function render() {
   if (state.phase === 'gameOver') { renderResult(); return; }
 
   renderPlayers();
-  renderDummies();
   renderGoal();
   renderBoard();
   renderSuitTally();
@@ -129,58 +128,6 @@ function renderPlayers() {
       </div>
     `;
     ul.appendChild(li);
-  }
-}
-
-function renderDummies() {
-  const ul = $('dummy-list');
-  if (state.dummies.length === 0) {
-    ul.innerHTML = '<li style="font-size: 12px; color: var(--ink-soft); font-style: italic;">なし（4-5人プレイ）</li>';
-    return;
-  }
-  // Track per-dummy reveal state so we only re-render (and flip-animate) on change.
-  const flipped = new Set();
-  for (const d of state.dummies) {
-    const cardKey = d.revealed ? `${d.revealed.suit}${d.revealed.value}${d.revealed.effect || ''}` : '';
-    let li = ul.querySelector(`[data-dummy-id="${d.id}"]`);
-    const prevKey = li ? li.dataset.cardKey || '' : '';
-    if (li && prevKey === cardKey) {
-      // Just refresh deck count
-      const deckSpan = li.querySelector('.dummy-deck');
-      if (deckSpan) deckSpan.textContent = `山${d.deck.length}`;
-      continue;
-    }
-    if (!li) {
-      li = document.createElement('li');
-      li.className = 'dummy-item';
-      li.dataset.dummyId = d.id;
-      ul.appendChild(li);
-    }
-    li.dataset.cardKey = cardKey;
-    let cardHTML;
-    if (d.revealed) {
-      cardHTML = `
-        <div class="card card-img-wrap small">
-          <div class="flip-card${prevKey === '' ? ' flipped' : ''}">
-            <div class="flip-face flip-back"><img class="card-img" src="assets/cards/hand/back.webp" alt="裏"></div>
-            <div class="flip-face flip-front"><img class="card-img" src="${cardImagePath(d.revealed, 'hand')}" alt="${d.revealed.value}"></div>
-          </div>
-        </div>
-      `;
-      if (prevKey === '') flipped.add(li);
-    } else {
-      cardHTML = cardBackHTML('small');
-    }
-    li.innerHTML = `<span class="label">${d.id}</span>${cardHTML}<span class="dummy-deck" style="font-size: 11px; color: var(--ink-soft); margin-left:auto;">山${d.deck.length}</span>`;
-  }
-  // Trigger flip animations on next frame for freshly-revealed cards.
-  if (flipped.size) {
-    requestAnimationFrame(() => {
-      for (const li of flipped) {
-        const fc = li.querySelector('.flip-card');
-        if (fc) fc.classList.remove('flipped');
-      }
-    });
   }
 }
 
