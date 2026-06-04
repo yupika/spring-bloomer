@@ -1,0 +1,11 @@
+.git
+.claude
+.assetsignore
+node_modules
+backend
+server
+tools
+*.md
+wrangler.jsonc
+package.json
+package-lock.json
