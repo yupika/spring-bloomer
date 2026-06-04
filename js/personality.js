@@ -83,6 +83,16 @@ function rollBiddingStyle() {
   }
 }
 
+function rollSkill() {
+  const r = Math.random();
+  let acc = 0;
+  for (const lv of SKILL_LEVELS) {
+    acc += SKILL_WEIGHTS[lv] || 0;
+    if (r < acc) return lv;
+  }
+  return SKILL_LEVELS[SKILL_LEVELS.length - 1];
+}
+
 function rollPersonality() {
   const type = PERSONALITY_TYPES[Math.floor(Math.random() * PERSONALITY_TYPES.length)];
   const jitter = (range) => (Math.random() - 0.5) * range;
@@ -179,8 +189,15 @@ const DEFAULT_BIDDING_STYLE = {
 };
 function B(player) { return player.biddingStyle || DEFAULT_BIDDING_STYLE; }
 
+// Skill accessor + layer gate. Higher level enables all lower layers.
+function SK(player) { return player.skill || 'L1'; }
+function hasLayer(player, minLevel) {
+  return SKILL_LEVELS.indexOf(SK(player)) >= SKILL_LEVELS.indexOf(minLevel);
+}
+
 // Resource awareness: estimate how scarce our deck/hand feels given the player's
 // resource style. Returns multiplier in [pressureFloor, 1.0]. Lower = scarcer.
+// (L1 legacy path only; L2+ uses spendCap/affordability instead — see ai.js.)
 const DEFAULT_RESOURCE = { worryThreshold: 2.4, pressureFloor: 0.40 };
 function resourcePressure(player) {
   const mode = player.resourceMode || DEFAULT_RESOURCE;

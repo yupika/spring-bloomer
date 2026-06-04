@@ -30,8 +30,13 @@ function startGame(numPlayers, humanName) {
       personality: isHuman ? null : rollPersonality(),
       resourceMode: isHuman ? null : rollResourceMode(),
       biddingStyle: isHuman ? null : rollBiddingStyle(),
+      skill: isHuman ? null : rollSkill(),
     });
   }
+
+  // Public card-counting memory: cards each seat has revealed (sim + bidding).
+  // Equals public info (every deck is the known 35-card set); used by L3/L4 AI.
+  state.seenBySeat = state.players.map(() => []);
 
   const dc = DUMMY_COUNTS[numPlayers];
   for (let i = 0; i < dc; i++) {
@@ -138,6 +143,7 @@ function processSimultaneousReveal() {
     const idx = p.hand.indexOf(p.simChoice);
     if (idx >= 0) p.hand.splice(idx, 1);
     state.field.push({ playerId: p.id, card: p.simChoice, fromDummy: false });
+    if (state.seenBySeat) state.seenBySeat[p.id].push(p.simChoice);
     log(`${p.name} → ${formatCard(p.simChoice)}`);
   }
   for (const d of state.dummies) {
@@ -299,6 +305,7 @@ function playCard(playerId, cardIdx) {
   const card = player.hand[cardIdx];
   if (!card) return;
   player.hand.splice(cardIdx, 1);
+  if (state.seenBySeat) state.seenBySeat[playerId].push(card);
   player._committedThisBattle = (player._committedThisBattle || 0) + 1;
 
   const pos = state.positions.find(p => p.playerId === playerId);

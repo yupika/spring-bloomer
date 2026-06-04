@@ -95,7 +95,8 @@ function calculateDesire(player) {
 
   // === Resource pressure: dampen when cards are scarce (unless near-win) ===
   // Burner/flex/hoarder differentiation lives here.
-  if (desire < 0.85) {
+  // L1 (legacy) only — L2+ planners use the affordability contest gate instead.
+  if (!hasLayer(player, 'L2') && desire < 0.85) {
     const press = resourcePressure(player);
     // Aggressive remap so hoarder vs burner produces noticeable spread.
     desire *= 0.30 + 0.70 * press;
@@ -112,6 +113,112 @@ function calculateDesire(player) {
   }
 
   return Math.max(0, Math.min(1, desire));
+}
+
+// === Resource planning (L2+) ===
+// Forward-looking budget: how many battles can we still afford to *contest*?
+// Each battle costs ~1 forced sim card; contesting adds ~CONTEST_COST more.
+function affordability(player) {
+  const battlesLeft = Math.max(1, state.maxRounds - state.currentRound + 1);
+  const myLeft = player.hand.length + player.deck.length;
+  const contestBudget = Math.max(0, myLeft - battlesLeft); // reserve 1 sim/battle
+  const affordable = contestBudget / CONTEST_COST;
+  const fightDensity = affordable / battlesLeft; // <1 → can't fight every battle
+  return { battlesLeft, myLeft, fightDensity };
+}
+
+// Per-battle spend cap (L2+): how many cards we'll commit to *this* battle before
+// folding. Goal cards are the win condition, so the default is to fight at full
+// strength like everyone else — the cap only refuses the PATHOLOGICAL case: being
+// dragged into an endless bidding war that bleeds the deck dry (the exploit that
+// beat the old AI). Squeeze below full strength only under real scarcity.
+const RESOURCE_SPEND_SHIFT = { burner: 1, flex: 0, hoarder: -1 };
+function spendCap(player, desire) {
+  const a = affordability(player);
+  // Full-strength baseline: an average contested battle costs ~CONTEST_COST extra.
+  let cap = CONTEST_COST;
+  cap += RESOURCE_SPEND_SHIFT[player.resourceMode ? player.resourceMode.type : 'flex'] || 0;
+  // Value-scaled: high-value battles justify a longer war; weak ones, shorter.
+  if (desire >= 0.80) cap += 2;
+  else if (desire >= 0.55) cap += 1;
+  else if (desire < 0.35) cap -= 1;
+  // Scarcity squeeze: only ration when the deck genuinely can't keep up.
+  if (a.fightDensity < 0.50) cap -= 1;
+  if (a.fightDensity < 0.25) cap -= 1;
+  // Endgame/surplus release: leftover cards are worthless, spend the reserve.
+  if (a.battlesLeft <= 3) cap += 2;
+  if (a.myLeft > a.battlesLeft * 4) cap += 2;
+
+  // === L3 counting: read opponents' remaining cards (public-derivable) ===
+  if (hasLayer(player, 'L3')) {
+    const opps = state.players.filter(p => p.id !== player.id && !p.droppedOut);
+    if (opps.length) {
+      const oppLefts = opps.map(p => p.hand.length + p.deck.length);
+      const oppAvg = oppLefts.reduce((s, x) => s + x, 0) / opps.length;
+      const oppMin = Math.min.apply(null, oppLefts);
+      const oppMax = Math.max.apply(null, oppLefts);
+      // I out-card my rivals → stand firm, outlast aggressors (they exhaust first).
+      if (a.myLeft > oppAvg + 3) cap += 2;
+      // Rivals nearly dry → cheap/free wins are there; push to claim them.
+      if (oppMin <= 3) cap += 1;
+      // Someone is out-hoarding me badly → mirror them: probe with one card,
+      // never feed a war. Keeps our stock up so their late-game scoop (the
+      // conserve exploit: hoard, then chain instant-win goals against a dry
+      // field) meets real contests. Block-level desire still overrides.
+      if (oppMax > a.myLeft + 4 && a.battlesLeft > 3 && desire < 0.80) cap = 1;
+    }
+  }
+  // === L4 composition: weigh remaining cards, not just count them ===
+  // I know my own pool exactly; rivals' pools are derivable (see rivalRemaining).
+  // If my remaining movement dominates the strongest rival's, extend the stand.
+  if (hasLayer(player, 'L4')) {
+    const opps = state.players.filter(p => p.id !== player.id && !p.droppedOut);
+    if (opps.length) {
+      const myPool = player.hand.concat(player.deck);
+      const mySum = myPool.reduce((s, c) => s + effectiveSimValue(c), 0);
+      let bestOppSum = 0;
+      for (const o of opps) {
+        const sum = rivalRemaining(o.id).reduce((s, c) => s + effectiveSimValue(c), 0);
+        if (sum > bestOppSum) bestOppSum = sum;
+      }
+      // I out-power everyone → press on. (No tighten branch: the L3 mirror
+      // already handles being badly out-carded; tightening here just made L4
+      // fold winnable battles in normal games.)
+      if (mySum > bestOppSum * 1.25) cap += 1;
+    }
+  }
+  return Math.max(1, cap);
+}
+
+// === L4 composition estimation (fair: public info only) ===
+// Every deck starts from the same public composition (DECK_SPEC + WILD_TEMPLATES).
+// Subtracting a rival's seen plays yields their exact remaining multiset —
+// hand/deck split stays hidden, but the pool itself is knowable.
+function rivalRemaining(oppId) {
+  const rem = [];
+  for (const s of SUITS) for (const v of DECK_SPEC[s]) rem.push({ value: v, suit: s, effect: null });
+  for (const t of WILD_TEMPLATES) rem.push({ value: t.value, suit: WILD, effect: t.effect });
+  const seen = (state.seenBySeat && state.seenBySeat[oppId]) || [];
+  for (const c of seen) {
+    const i = rem.findIndex(r => r.suit === c.suit && r.value === c.value &&
+                                 (r.effect || null) === (c.effect || null));
+    if (i >= 0) rem.splice(i, 1);
+  }
+  return rem;
+}
+
+// Highest sim-reveal score any active rival could still show for this goal suit.
+// Goal-suit cards get +1; wilds don't. Used to right-size our own sim card.
+function rivalMaxReveal(player, goalSuit) {
+  let best = 0;
+  for (const o of state.players) {
+    if (o.id === player.id || o.droppedOut) continue;
+    for (const c of rivalRemaining(o.id)) {
+      const v = (c.suit === goalSuit) ? c.value + 1 : effectiveSimValue(c);
+      if (v > best) best = v;
+    }
+  }
+  return best;
 }
 
 // Effective face value for sorting/sim choice purposes
@@ -141,6 +248,14 @@ function cpuChooseSimultaneous(player) {
   if (desire >= 0.85) {
     const matching = player.hand.filter(c => c.suit === goalSuit);
     if (matching.length > 0) {
+      // L4: right-size the reveal — cheapest goal-suit card that still tops
+      // anything rivals can show. Don't burn the A7 when an A4 already wins.
+      if (hasLayer(player, 'L4') && matching.length > 1) {
+        const rivMax = rivalMaxReveal(player, goalSuit);
+        const asc = matching.slice().sort((a, b) => a.value - b.value);
+        const enough = asc.find(c => c.value + 1 >= rivMax);
+        if (enough) return enough;
+      }
       // Aggressive personalities lead with their highest goal-suit card; others
       // lean toward upper-mid (save the best for turn play).
       const sorted = matching.slice().sort((a, b) => b.value - a.value);
@@ -403,6 +518,23 @@ function cpuDecideAction(player) {
   }
 
   // === We are the lowest (or tied for lowest) — must play or drop ===
+
+  // L2+ efficiency: once we've spent our budget for this battle, fold rather than
+  // chase. Cheap wins still happen below this cap; expensive bidding wars don't.
+  if (hasLayer(player, 'L2') && committed >= spendCap(player, desire)) {
+    // Allow one last cheap escape that secures the battle, else drop.
+    const posC = state.positions.find(p => p.playerId === playerId);
+    const othersC = state.positions
+      .filter(p => p.playerId !== playerId && !state.players[p.playerId].droppedOut);
+    const minOtherC = othersC.length ? Math.min.apply(null, othersC.map(p => p.value)) : posC.value;
+    const marginC = (minOtherC - posC.value) + 1;
+    let cheapIdx = -1;
+    for (let i = 0; i < player.hand.length; i++) {
+      const c = player.hand[i];
+      if (computeScore(c) >= marginC && effectiveSimValue(c) <= 1) { cheapIdx = i; break; }
+    }
+    return cheapIdx >= 0 ? { type: 'play', idx: cheapIdx } : { type: 'drop' };
+  }
 
   // Find the lowest "other" target we need to overtake
   const others = state.positions

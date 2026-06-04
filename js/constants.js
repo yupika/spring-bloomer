@@ -70,6 +70,22 @@ const DUMMY_COUNTS = { 2: 3, 3: 2, 4: 0, 5: 0 };
 // Number of distinct suits required to win (alternative to 3 of same suit)
 const DISTINCT_SUITS_REQUIRED = 4;
 
+// ===== Skill levels (orthogonal to personality) =====
+// Which cognitive layers a CPU runs. Personality is the *style* within a level.
+//   L1 直感: per-battle judgment only (legacy behaviour)
+//   L2 計画: + resource planning (affordability) — picks which battles to contest
+//   L3 計数: + card counting (opponent card counts) — pushes when rivals run dry
+//   L4 読み: + composition estimation — reads rivals' remaining suits/values
+const SKILL_LEVELS = ['L1', 'L2', 'L3', 'L4'];
+const SKILL_LABELS = { L1: '直感', L2: '計画', L3: '計数', L4: '読み' };
+// Per-CPU random assignment weights (a mixed roster, not always the strongest).
+const SKILL_WEIGHTS = { L1: 0.30, L2: 0.30, L3: 0.25, L4: 0.15 };
+
+// ===== Resource planning (affordability) tuning =====
+// Avg extra bidding cards spent to contest one battle (measured ~4; +1 forced sim).
+// Also the full-strength per-battle spend cap baseline for L2+ (see spendCap).
+const CONTEST_COST = 4;
+
 const PLAYER_COLORS = ['#b73e5e', '#3f6e9a', '#c89018', '#6b4d7a', '#4f7355'];
 
 // ===== Personality system =====
