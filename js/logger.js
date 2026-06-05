@@ -9,7 +9,7 @@
 // (e.g. api-bloom.dilettantegames.net) once the DNS/route is wired.
 const API_ORIGIN = 'https://spring-bloomer-api.yupika-iris.workers.dev';
 
-const APP_VERSION = 'v0.3';
+const APP_VERSION = 'v0.4'; // v0.4: AIスキルレベル制 + seats[].skill / game_end残枚数を記録
 const UID_KEY    = 'bloomer-uid';
 const OPTIN_KEY  = 'bloomer-log-optin';
 
@@ -55,7 +55,7 @@ function logGameStart(numPlayers, parentIdx) {
   const mode    = (typeof state !== 'undefined' && state.mode)    || 'single';
   const mySeat  = (typeof state !== 'undefined' && state.mySeat != null) ? state.mySeat : 0;
   const seats   = (typeof state !== 'undefined' && Array.isArray(state.players))
-    ? state.players.map(p => ({ id: p.id, name: p.name, is_human: !!p.isHuman }))
+    ? state.players.map(p => ({ id: p.id, name: p.name, is_human: !!p.isHuman, skill: p.skill || null }))
     : [];
   _meta = { started_at: Date.now(), num_players: numPlayers, mode, my_seat: mySeat };
   logEvent('game_start', { num_players: numPlayers, parent_idx: parentIdx, mode, my_seat: mySeat, seats });
@@ -70,7 +70,18 @@ function logEvent(type, data) {
 
 function logGameEnd(meta) {
   if (!_shouldLog() || !_buffer) return;
-  logEvent('game_end', meta);
+  // Per-seat terminal state: cards left + goals taken. Lets us verify AI
+  // resource behaviour (exhaustion vs reserve) per skill level from logs.
+  const seatsEnd = (typeof state !== 'undefined' && Array.isArray(state.players))
+    ? state.players.map(p => ({
+        id: p.id,
+        skill: p.skill || null,
+        cards_left: p.hand.length + p.deck.length,
+        goals: p.goalCards.length,
+        goal_points: p.goalCards.reduce((s, c) => s + c.value, 0),
+      }))
+    : [];
+  logEvent('game_end', Object.assign({ seats_end: seatsEnd }, meta));
 
   if (!isLogOptedIn()) {
     _buffer = null; _meta = null;
